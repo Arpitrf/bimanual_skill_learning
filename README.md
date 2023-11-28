@@ -1,2 +1,2 @@
 # bimanual_skill_learning
- Testing2
+ Testing
