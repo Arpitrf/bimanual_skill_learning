@@ -103,7 +103,7 @@ S = [
 
 # Initial pose
 T0 = np.array([[1, 0, 0, 4],
-    [0, 1, 0, 2],
+    [0, 1, 0, 1],
     [0, 0, 1, 0],
     [0, 0, 0, 1]])
 ax.scatter(T0[0][3], T0[1][3], T0[2][3], color='r', marker='o')
@@ -114,11 +114,16 @@ for theta in np.arange(0.1, 6.4, 0.1):
 
     # T1 = np.dot(T0, expm(S_theta))
     T1 = np.dot(expm(S_theta), T0)
+    print("T1: ", T1[0][3], T1[1][3], T1[2][3])
     ax.scatter(T1[0][3], T1[1][3], T1[2][3], color='g', marker='o')
 
  # Set labels
 ax.set_xlabel('X-axis')
 ax.set_ylabel('Y-axis')
 ax.set_zlabel('Z-axis')
+
+ax.set_xlim([0, 12])
+ax.set_ylim([0, 12])
+ax.set_zlim([0, 12])
 
 plt.show()

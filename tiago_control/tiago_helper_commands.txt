@@ -1,0 +1,272 @@
+source ~/Desktop/tiago_teleop/venv/bin/activate
+
+[-0.02927815 -0.39696712  1.11367162] [-0.62445749 -0.55287778 -0.39586573  0.38427767]
+
+# Home for right hand
+rostopic pub /whole_body_kinematic_controller/arm_right_tool_link_goal \geometry_msgs/PoseStamped "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: '/base_footprint'
+pose:
+    position:
+        x: -0.02927815
+        y: -0.39696712
+        z: 1.11367162
+    orientation:
+        x: -0.62445749
+        y: -0.55287778
+        z: -0.39586573
+        w: 0.38427767"
+
+
+# Home for left hand
+[-0.02548016  0.39222628  1.27469595  0.38418421  0.3958858   0.55289361
+ -0.62448826]
+rostopic pub /whole_body_kinematic_controller/arm_left_tool_link_goal \geometry_msgs/PoseStamped "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: '/base_footprint'
+pose:
+    position:
+        x: -0.02548016
+        y: 0.39222628
+        z: 1.27469595 
+    orientation:
+        x: 0.38418421   
+        y: 0.3958858
+        z: 0.55289361
+        w: -0.62448826"
+
+rostopic pub /whole_body_kinematic_controller/arm_right_tool_link_goal \geometry_msgs/PoseStamped "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: '/base_footprint'
+pose:
+    position:
+        x: 0.5
+        y: -0.3
+        z: 1
+    orientation:
+        x: 0.6164128
+        y: 0.48313739
+        z: -0.05566732
+        w: 0.61928561"
+
+rostopic pub /whole_body_kinematic_controller/arm_right_tool_link_goal \geometry_msgs/PoseStamped "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: '/base_footprint'
+pose:
+    position:
+        x: 0.5
+        y: -0.3
+        z: 1
+    orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0"
+
+
+# Run WBC without torso
+1. rosservice call /controller_manager/switch_controller "start_controllers:
+- ''             
+stop_controllers:
+- 'head_controller'
+- 'arm_left_controller'
+- 'arm_right_controller'
+- 'whole_body_kinematic_controller'
+strictness: 0"  
+
+or 
+
+rosservice call /controller_manager/switch_controller "start_controllers:
+- ''
+stop_controllers:
+- 'head_controller'
+- 'arm_left_controller'
+- 'arm_right_controller'
+- 'torso_controller'
+- 'whole_body_kinematic_controller'
+strictness: 0"
+
+
+
+2. rosservice call /controller_manager/unload_controller "{name:'whole_body_kinematic_controller'}"
+3. roslaunch tiago_dual_wbc tiago_dual_wbc.launch control_torso:=true base_frame:=base_footprint
+4. In another tab: roslaunch tiago_dual_wbc push_reference_tasks.launch source_data_arm:=topic_reflexx_typeII source_data_gaze:=topic
+
+# to only use left arm
+3. roslaunch tiago_dual_wbc tiago_dual_wbc.launch control_torso:=false base_frame:=base_footprint control_right_arm:=false
+4. In another tab: roslaunch tiago_dual_wbc push_reference_left.launch source_data_arm:=topic_reflexx_typeII source_data_gaze:=topic
+
+# helpful commmands
+1. rosservice call /whole_body_kinematic_controller/get_stack_description
+2. rosservice call /controller_manager/list_controllers
+
+
+rostopic pub /gripper_right_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names: ['gripper_right_finger_joint']
+points:
+  - positions: [0.04]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 1
+        nsecs: 0" --once
+
+
+rostopic pub /parallel_gripper_left_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names:
+    ['parallel_gripper_joint']
+points:
+  - positions: [0.9]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 1
+        nsecs: 0" --once
+
+
+rostopic pub /gripper_left_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names: ['gripper_left_left_finger_joint', 'gripper_left_right_finger_joint']
+points:
+  - positions: [0.0, 0.01]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 1
+        nsecs: 0" --once
+
+
+# control arm. The give joint pos is the tucked in arm pose.
+
+rostopic pub /arm_left_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names: ['arm_left_1_joint', 'arm_left_2_joint', 'arm_left_3_joint', 'arm_left_4_joint', 'arm_left_5_joint', 'arm_left_6_joint', 'arm_left_7_joint']
+points: 
+  - positions: [-1.1071653193023363, 1.5001040006749604, 2.73285370231174, 1.6455297764960346, -1.5061877978109275, 1.3863927732449999, 0.11012946206916995]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 1
+        nsecs: 0" --once
+
+
+
+# control arm. The give joint pos is a custom arm pose.
+
+rostopic pub /arm_left_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names: ['arm_left_1_joint', 'arm_left_2_joint', 'arm_left_3_joint', 'arm_left_4_joint', 'arm_left_5_joint', 'arm_left_6_joint', 'arm_left_7_joint']
+points: 
+  - positions: [-0.1488993541855221, -0.5663182484775039, 1.1562073355934284, 1.4685980855665832, 0.34978101865231986, 1.3578788821947045, 0.8110035348258153]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 5
+        nsecs: 0" --once    
+
+
+
+# Look at a specific pose
+rostopic pub /whole_body_kinematic_controller/gaze_objective_xtion_optical_frame_goal \geometry_msgs/PoseStamped "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: 'base_footprint'
+pose:
+    position:
+        x: 1.0
+        y: 0.0
+        z: 0.6
+    orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0"
+
+# Look at side
+rostopic pub /whole_body_kinematic_controller/gaze_objective_xtion_optical_frame_goal \geometry_msgs/PoseStamped "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: 'base_footprint'
+pose:
+    position:
+        x: 0.8
+        y: -0.3
+        z: 0.6
+    orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0"
+
+
+rostopic pub /whole_body_kinematic_controller/arm_left_tool_link_goal \geometry_msgs/PoseStamped "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: '/base_footprint'
+pose:
+    position:
+        x: 0.5
+        y: 0.3
+        z: 1
+    orientation:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+        w: 1.0"

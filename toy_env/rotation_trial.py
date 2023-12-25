@@ -95,6 +95,8 @@ T0 = [
 ]
 
 delta_Ts = []
+Ts = []
+Ts.append(T0)
 # pt1 20 degrees for pos, 40 degrees for orn
 for i in range(30, 360, 30):
     angle = i
@@ -107,6 +109,7 @@ for i in range(30, 360, 30):
     print("pos of point: ", counter, pt1_pos)
     
     # angle = 20*counter
+    # angle = 20
     angle = i
     angle = math.radians(angle)
     rotation_R = R.from_rotvec(angle * axis_of_rotation)
@@ -127,61 +130,126 @@ for i in range(30, 360, 30):
     counter += 1
     delta_T = np.dot(T1, np.linalg.inv(T0))
     delta_Ts.append(delta_T)
+    Ts.append(T1)
     T0 = T1
 
 
 from scipy.linalg import logm, expm
 import numpy as np
 
-# Example transformation matrix
-# T = np.array([[0.707, -0.707, 0, 1],
-#               [0.707, 0.707, 0, 2],
-#               [0, 0, 1, 3],
-#               [0, 0, 0, 1]])
+# for counter, delta_T in enumerate(delta_Ts):
+#     print(f"----- {counter} -----")
+#     if counter == 0:
+#         continue
+#     # Compute the matrix logarithm
+#     log_T = logm(delta_T)
+#     print(log_T)
 
-print("delta_Ts: ", np.array(delta_Ts).shape)
+#     # Extract linear velocities
+#     linear_velocities = log_T[:3, 3]
 
-for counter, delta_T in enumerate(delta_Ts):
-    print(f"----- {counter} -----")
-    if counter == 0:
-        continue
-    # Compute the matrix logarithm
-    log_T = logm(delta_T)
-    print(log_T)
+#     # Extract skew-symmetric matrix (angular velocities)
+#     S = log_T[:3, :3]
 
-    # Extract linear velocities
-    linear_velocities = log_T[:3, 3]
+#     # Calculate angular velocities from the skew-symmetric matrix
+#     angular_velocities = np.array([S[2, 1] - S[1, 2], S[0, 2] - S[2, 0], S[1, 0] - S[0, 1]]) / 2.0
 
-    # Extract skew-symmetric matrix (angular velocities)
-    S = log_T[:3, :3]
+#     # Combine linear and angular velocities to get the twist
+#     twist = np.concatenate((linear_velocities, angular_velocities))
 
-    # Calculate angular velocities from the skew-symmetric matrix
-    angular_velocities = np.array([S[2, 1] - S[1, 2], S[0, 2] - S[2, 0], S[1, 0] - S[0, 1]]) / 2.0
+#     print("Twist vector:", twist)
 
-    # Combine linear and angular velocities to get the twist
-    twist = np.concatenate((linear_velocities, angular_velocities))
+#     screw_axis = angular_velocities / np.linalg.norm(angular_velocities)
+#     theta = np.linalg.norm(angular_velocities)
+#     q = np.cross(screw_axis, linear_velocities) / theta
+#     print("screw_axis: ", screw_axis)
+#     print("q: ", q)
 
-    print("Twist vector:", twist)
+#     # Define the length of the line
+#     length = 2
 
-    screw_axis = angular_velocities / np.linalg.norm(angular_velocities)
-    theta = np.linalg.norm(angular_velocities)
-    q = np.cross(screw_axis, linear_velocities) / theta
-    print("screw_axis: ", screw_axis)
-    print("q: ", q)
+#     # Calculate the endpoint of the line
+#     endpoint = q + length * screw_axis
 
-    # Define the length of the line
-    length = 2
+#     # Plot the line
+#     ax.plot([q[0], endpoint[0]], [q[1], endpoint[1]], [q[2], endpoint[2]], c=[counter*0.05,0,0])
 
-    # Calculate the endpoint of the line
-    endpoint = q + length * screw_axis
+#     # Set labels
+#     ax.set_xlabel('X-axis')
+#     ax.set_ylabel('Y-axis')
+#     ax.set_zlabel('Z-axis')
 
-    # Plot the line
-    ax.plot([q[0], endpoint[0]], [q[1], endpoint[1]], [q[2], endpoint[2]], c=[counter*0.05,0,0])
+# -------------------- Compute the screw axis based on 2 poses ---------------------
+start_T = Ts[1]
+final_T = Ts[-1]
+# delta_T = np.dot(final_T, np.linalg.inv(start_T))
+delta_T = np.dot(final_T, np.linalg.inv(start_T))
 
-    # Set labels
-    ax.set_xlabel('X-axis')
-    ax.set_ylabel('Y-axis')
-    ax.set_zlabel('Z-axis')
+# Compute the matrix logarithm
+log_T = logm(delta_T)
+
+# Extract linear velocities
+linear_velocities = log_T[:3, 3]
+
+# Extract skew-symmetric matrix (angular velocities)
+S = log_T[:3, :3]
+print("S: ", S)
+
+# Calculate angular velocities from the skew-symmetric matrix
+angular_velocities = np.array([S[2, 1] - S[1, 2], S[0, 2] - S[2, 0], S[1, 0] - S[0, 1]]) / 2.0
+print("angular_velocities: ", angular_velocities)
+
+# Combine linear and angular velocities to get the twist
+twist = np.concatenate((linear_velocities, angular_velocities))
+print("Twist vector:", twist)
+
+screw_axis = angular_velocities / np.linalg.norm(angular_velocities)
+theta = np.linalg.norm(angular_velocities)
+q = np.cross(screw_axis, linear_velocities) / theta
+print("screw_axis: ", screw_axis)
+print("q: ", q)
+
+# Define the length of the line
+length = 2000
+# Calculate the endpoint of the line
+endpoint = q + length * screw_axis
+# Plot the line
+ax.plot([q[0], endpoint[0]], [q[1], endpoint[1]], [q[2], endpoint[2]], c=[0,0,1])
+# -----------------------------------------------------------------------------
+
+# ----------- Compute the trajectory based on the previously obtained screw axis ------------
+h = 0 # pure rotation
+s_hat = screw_axis
+w = s_hat
+v = -np.cross(s_hat, q)
+twist = np.concatenate((w,v)) 
+# Calculate the matrix form of the twist vector
+w = twist[:3]
+# w_matrix = R.from_rotvec(w).as_matrix()
+w_matrix = [
+    [0, -w[2], w[1]],
+    [w[2], 0, -w[0]],
+    [-w[1], w[0], 0],
+]
+# print("w_matrix: ", w_matrix)
+S = [
+    [w_matrix[0][0], w_matrix[0][1], w_matrix[0][2], twist[3]],
+    [w_matrix[1][0], w_matrix[1][1], w_matrix[1][2], twist[4]],
+    [w_matrix[2][0], w_matrix[2][1], w_matrix[2][2], twist[5]],
+    [0, 0, 0, 0]
+]
+# S = log_T
+T0 = start_T
+
+# Calculate the transformation of the point when moved by theta along the screw axis
+for theta in np.arange(0.1, 6.28, 0.1):
+    S_theta = theta * np.array(S)
+
+    # T1 = np.dot(T0, expm(S_theta))
+    T1 = np.dot(expm(S_theta), T0)
+    # print("T1: ", T1[0][3], T1[1][3], T1[2][3])
+    ax.scatter(T1[0][3], T1[1][3], T1[2][3], color='g', marker='o')
+# ------------------------------------------------------------------------------------------
     
 # Show the plot
 plt.show()
