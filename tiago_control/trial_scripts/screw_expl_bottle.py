@@ -1,7 +1,11 @@
+import sys
+import os
+parent_dir = os.path.dirname('/home/pal/arpit/bimanual_skill_learning/tiago_control')
+sys.path.append(parent_dir)
 import time
 import rospy
 import numpy as np
-from tiago_gym import TiagoGym, Listener, ForceTorqueSensor
+from tiago_control.tiago_gym import TiagoGym, Listener, ForceTorqueSensor
 from control_msgs.msg  import JointTrajectoryControllerState
 from scipy.spatial.transform import Rotation as R
 from scipy.linalg import logm, expm
@@ -9,7 +13,6 @@ import pickle
 import matplotlib.pyplot as plt
 from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Point, Vector3
-import os
 from argparse import ArgumentParser
 
 def config_parser(parser=None):
@@ -17,6 +20,27 @@ def config_parser(parser=None):
         parser = ArgumentParser("Bimanual Skill Learning")
     parser.add_argument('--f_name', type=str)
     return parser
+
+def publish_sphere_marker(marker_pub, pos):
+    marker = Marker()
+    marker.id = 0
+    marker.header.frame_id = "base_footprint"  # Set your desired frame_id
+    marker.header.stamp = rospy.Time.now()
+    marker.type = Marker.SPHERE
+    marker.action = Marker.ADD
+    marker.scale.x = 0.05  # Line width
+    marker.scale.y = 0.05  # Line width
+    marker.scale.z = 0.05  # Line width
+    marker.pose.position.x = pos[0] #0.535 
+    marker.pose.position.y = pos[1] #-0.165
+    marker.pose.position.z = pos[2] #0.736
+
+    marker.color.a = 1.0  # Alpha
+    marker.color.r = 0.0  # Red
+    marker.color.g = 0.0  # Green
+    marker.color.b = 1.0  # Blue
+
+    marker_pub.publish(marker)
 
 def publish_line_marker(marker_pub, axis, q, counter):
     # rospy.init_node('line_marker_publisher', anonymous=True)
@@ -97,9 +121,9 @@ def publish_line_marker(marker_pub, axis, q, counter):
     marker.scale.x = 0.05  # Line width
     marker.scale.y = 0.05  # Line width
     marker.scale.z = 0.05  # Line width
-    marker.pose.position.x = 0.535
-    marker.pose.position.y = -0.165
-    marker.pose.position.z = 0.736
+    marker.pose.position.x = 0.55027766 #0.535 
+    marker.pose.position.y = -0.18231454 #-0.165
+    marker.pose.position.z = 1.123665 #0.736
 
     marker.color.a = 1.0  # Alpha
     marker.color.r = 0.0  # Red
@@ -278,7 +302,7 @@ def check_traj_quality(traj_points):
 
 
 # Initializations
-seed = 100
+seed = 0
 args = config_parser().parse_args()
 np.random.seed(seed)
 rospy.init_node('tiago_test')
@@ -348,7 +372,7 @@ delete_all_marker = Marker()
 delete_all_marker.action = Marker.DELETEALL
 marker_pub.publish(delete_all_marker)
 
-save_folder = f'tiago_teleop/tiago_control/output/seed_{seed}/'
+save_folder = f'output/seed_{seed}/'
 os.makedirs(save_folder, exist_ok=True)
 
 counter = 00
@@ -387,11 +411,29 @@ for traj_number in range(1):
     # s_hat, q = np.array([-0.11020542, -0.03296062,  0.99336215]), np.array([ 0.72305601, -0.20245814,  0.1171972 ])
     # 15
     # s_hat, q = np.array([-0.07686291,  0.00660992,  0.99701976]), np.array([ 0.71670167, -0.17766795,  0.04005383])
+    # From the offline experiment - worked well
+    # s_hat, q = np.array([-0.07537131, -0.10596028,  0.99150975]), np.array([ 0.57661343, -0.08957348,  0.11892584]) # 1.42, 0.19
+    # s_hat, q = np.array([-0.11124864,  0.00892458,  0.99375253]), np.array([ 0.67924664, -0.19549993,  0.12938142]) # 0.49, 0.14
+    # after tooltip_ee_offset
+    # s_hat, q = np.array([-0.08816754, -0.02153198,  0.99587291]), np.array([ 0.59708694, -0.16966684,  0.13509701])
+    # trial 2
+    # s_hat, q = np.array([-0.07296414, -0.02632962,  0.99698695]), np.array([ 0.58814249, -0.14366633,  0.20695057])
+    # trial 1 
+    # s_hat, q = np.array([-0.0912213,  -0.09355492,  0.99142632]), np.array([ 0.57444014, -0.06673279,  0.11108433])
+    # trial 3
+    # s_hat, q = np.array([-0.08974382, -0.03931094,  0.99518877]), np.array([ 0.65867812, -0.1221976,   0.099134 ])
+    # trial 4
+    # s_hat, q = np.array([-0.1263994,  -0.01573022,  0.9918547 ]), np.array([ 0.5919598,  -0.2103789,   0.18964259]) 
+    # trial 5
+    # s_hat, q = np.array([-0.07385186, -0.17440865,  0.98189996]), np.array([ 0.68489215, -0.05320495,  0.14008214]) 
+    # trial 6
+    # s_hat, q = np.array([-0.10365334, -0.06341209,  0.99258999]), np.array([ 0.74633728, -0.20999397,  0.14893376]) 
+    # trial 7
+    s_hat, q = np.array([-0.25974761, -0.08710759,  0.9617398 ]), np.array([ 0.57954888, -0.23462,     0.03248047]) 
 
     # ideal_1
-    s_hat = np.array([0.0, 0.0, 1.0])
-    q = right_eef_pos
-    final_points = get_points_revolute(s_hat, q, T0)
+    # s_hat = np.array([0.0, 0.0, 1.0])
+    # q = right_eef_pos
 
     # s_hat_noise_1
     # s_hat = np.array([-0.10081928, -0.04468542,  0.99390074])
@@ -448,134 +490,143 @@ for traj_number in range(1):
     home_left_hand(env)
     home_right_hand(env)
 
-    # -------- Make left gripper go to pose and grasp ---------------
-    # Pregrasp pose
-    pose_command = env.tiago.create_pose_command(left_eef_pos_pre, left_eef_quat_pre)
-    print("Left Hand Going To Pose")
-    rospy.sleep(1)
-    env.tiago.tiago_pose_writer['left'].write(pose_command)
-    wait_left(left_eef_pos_pre, env)
-    rospy.sleep(1)
-    left_eef_pose = env._observation()['left_eef']
-    print("LEFT HAND: Desired and Actual left_eef_pos: ", left_eef_pos_pre, left_eef_pose[:3])
-    print("LEFT HAND: error in position: ", abs(left_eef_pos_pre - left_eef_pose[:3]))
+#     # -------- Make left gripper go to pose and grasp ---------------
+#     # Pregrasp pose
+#     pose_command = env.tiago.create_pose_command(left_eef_pos_pre, left_eef_quat_pre)
+#     print("Left Hand Going To Pose")
+#     rospy.sleep(1)
+#     env.tiago.tiago_pose_writer['left'].write(pose_command)
+#     wait_left(left_eef_pos_pre, env)
+#     rospy.sleep(1)
+#     left_eef_pose = env._observation()['left_eef']
+#     print("LEFT HAND: Desired and Actual left_eef_pos: ", left_eef_pos_pre, left_eef_pose[:3])
+#     print("LEFT HAND: error in position: ", abs(left_eef_pos_pre - left_eef_pose[:3]))
 
-    # Grasp pose
-    pose_command = env.tiago.create_pose_command(left_eef_pos, left_eef_quat)
-    print("Left Hand Going To Pose")
-    rospy.sleep(1)
-    env.tiago.tiago_pose_writer['left'].write(pose_command)
-    wait_left(left_eef_pos, env)
-    rospy.sleep(1)
-    left_eef_pose = env._observation()['left_eef']
-    print("LEFT HAND: Desired and Actual left_eef_pos: ", left_eef_pos, left_eef_pose[:3])
-    print("LEFT HAND: error in position: ", abs(left_eef_pos - left_eef_pose[:3]))
+#     # Grasp pose
+#     pose_command = env.tiago.create_pose_command(left_eef_pos, left_eef_quat)
+#     print("Left Hand Going To Pose")
+#     rospy.sleep(1)
+#     env.tiago.tiago_pose_writer['left'].write(pose_command)
+#     wait_left(left_eef_pos, env)
+#     rospy.sleep(1)
+#     left_eef_pose = env._observation()['left_eef']
+#     print("LEFT HAND: Desired and Actual left_eef_pos: ", left_eef_pos, left_eef_pose[:3])
+#     print("LEFT HAND: error in position: ", abs(left_eef_pos - left_eef_pose[:3]))
 
-    # Close gripper
-    rospy.sleep(1)
-    env.tiago.gripper['left'].write(0)
-    #-----------------------------------------------------------------
+#     # Close gripper
+#     rospy.sleep(1)
+#     env.tiago.gripper['left'].write(0)
+#     #-----------------------------------------------------------------
 
-    # --------- Make right gripper go to grasp pose and grasp --------
+#     # --------- Make right gripper go to grasp pose and grasp --------
 
-    # print("FT sensor before movement")
-    # rospy.sleep(1)
-    # val = ft.ft_reader.get_most_recent_msg()
-    # f = val.wrench.force
-    # t = val.wrench.torque
-    # print("f, sum(force), sum(torque): ", [f.x, f.y, f.z], abs(f.x) + abs(f.y) + abs(f.z), abs(t.x) + abs(t.y) + abs(t.z))
+#     # print("FT sensor before movement")
+#     # rospy.sleep(1)
+#     # val = ft.ft_reader.get_most_recent_msg()
+#     # f = val.wrench.force
+#     # t = val.wrench.torque
+#     # print("f, sum(force), sum(torque): ", [f.x, f.y, f.z], abs(f.x) + abs(f.y) + abs(f.z), abs(t.x) + abs(t.y) + abs(t.z))
 
-    rospy.sleep(1)
-    pose_command = env.tiago.create_pose_command(right_eef_pos, right_eef_quat)
-    print("Right Hand Going To Pose")
-    env.tiago.tiago_pose_writer['right'].write(pose_command)
-    wait_right(right_eef_pos, env)
-    rospy.sleep(1)
-    right_eef_pose = env._observation()['right_eef']
-    print("RIGHT HAND: Desired and Actual right_eef_pos: ", right_eef_pos, right_eef_pose[:3])
-    print("RIGHT HAND: error in position: ", abs(right_eef_pos - right_eef_pose[:3]))
+#     rospy.sleep(1)
+#     pose_command = env.tiago.create_pose_command(right_eef_pos, right_eef_quat)
+#     print("Right Hand Going To Pose")
+#     env.tiago.tiago_pose_writer['right'].write(pose_command)
+#     wait_right(right_eef_pos, env)
+#     rospy.sleep(1)
+#     right_eef_pose = env._observation()['right_eef']
+#     print("RIGHT HAND: Desired and Actual right_eef_pos: ", right_eef_pos, right_eef_pose[:3])
+#     print("RIGHT HAND: error in position: ", abs(right_eef_pos - right_eef_pose[:3]))
 
-    # Right hand grasp
-    rospy.sleep(1)
-    env.tiago.gripper['right'].write(0.7)
+#     # Right hand grasp
+#     rospy.sleep(1)
+#     env.tiago.gripper['right'].write(0.7)
 
-    # # FT sensor readings
-    # rospy.sleep(1)
-    # val = ft.ft_reader.get_most_recent_msg()
-    # f = val.wrench.force
-    # t = val.wrench.torque
-    # print("f, sum(force), sum(torque): ", [f.x, f.y, f.z], abs(f.x) + abs(f.y) + abs(f.z), abs(t.x) + abs(t.y) + abs(t.z))
-    # -----------------------------------------------------------------
+#     # # FT sensor readings
+#     # rospy.sleep(1)
+#     # val = ft.ft_reader.get_most_recent_msg()
+#     # f = val.wrench.force
+#     # t = val.wrench.torque
+#     # print("f, sum(force), sum(torque): ", [f.x, f.y, f.z], abs(f.x) + abs(f.y) + abs(f.z), abs(t.x) + abs(t.y) + abs(t.z))
+#     # -----------------------------------------------------------------
 
+#     rospy.sleep(1)
+#     right_eef_pose = env._observation()['right_eef']
+#     tooltip_ee_offset = np.array([0.26, 0, 0])
+#     print("quat: ", right_eef_pose[3:])
+#     right_eef_pose_mat = R.from_quat(right_eef_pose[3:]).as_matrix()
+#     tooltip_ee_offset_world = np.dot(right_eef_pose_mat, tooltip_ee_offset)
+#     temp_pos = right_eef_pos + tooltip_ee_offset_world[:3]
+#     print("temp_pos: ", temp_pos)
+#     publish_sphere_marker(marker_pub, temp_pos)
     
-    # ----------------------- Robot exeuting the task trajectory -------------------- 
-    forces, torques = [], []
-    forces_sum, torques_sum  = [], []
-    interrupted = False
+#     # ----------------------- Robot exeuting the task trajectory -------------------- 
+#     forces, torques = [], []
+#     forces_sum, torques_sum  = [], []
+#     interrupted = False
 
-    # input("STARTING ROBOT MOVEMENT")
-    print("STARTING ROBOT MOVEMENT")
-    rospy.sleep(1)
-    for i in range(len(final_points)):
-    # for i in range(8):
-        pt = final_points[i]
-        new_pos = np.array(pt[0:3,3])
-        new_rot_mat = np.array(pt[:3,:3])
-        new_quat = R.from_matrix(new_rot_mat).as_quat()
-        pose_command = env.tiago.create_pose_command(new_pos, new_quat)
-        env.tiago.tiago_pose_writer['right'].write(pose_command)
+#     # input("STARTING ROBOT MOVEMENT")
+#     print("STARTING ROBOT MOVEMENT")
+#     rospy.sleep(1)
+#     for i in range(len(final_points)):
+#     # for i in range(8):
+#         pt = final_points[i]
+#         new_pos = np.array(pt[0:3,3])
+#         new_rot_mat = np.array(pt[:3,:3])
+#         new_quat = R.from_matrix(new_rot_mat).as_quat()
+#         pose_command = env.tiago.create_pose_command(new_pos, new_quat)
+#         env.tiago.tiago_pose_writer['right'].write(pose_command)
 
-        rospy.sleep(2)
-        right_eef_pose = env._observation()['right_eef']
-        # print("desied, actual right_eef_pos: ", new_pos, right_eef_pose[:3])
-        print("error: ", abs(new_pos - right_eef_pose[:3]))
+#         rospy.sleep(2)
+#         right_eef_pose = env._observation()['right_eef']
+#         print("desied, actual right_eef_pos: ", new_pos, right_eef_pose[:3])
+#         print("error: ", abs(new_pos - right_eef_pose[:3]))
 
-        # FT Readings
-        rospy.sleep(1)
-        val = ft.ft_reader.get_most_recent_msg()
-        f = val.wrench.force
-        t = val.wrench.torque
-        forces.append(f)
-        torques.append(t)
-        force_sum = abs(f.x) + abs(f.y) + abs(f.z)
-        torque_sum = abs(t.x) + abs(t.y) + abs(t.z)
-        forces_sum.append(force_sum)
-        torques_sum.append(torque_sum)
-        print("f, sum(force), sum(torque): ", [f.x, f.y, f.z], force_sum, torque_sum)
+#         # FT Readings
+#         rospy.sleep(1)
+#         val = ft.ft_reader.get_most_recent_msg()
+#         f = val.wrench.force
+#         t = val.wrench.torque
+#         forces.append(f)
+#         torques.append(t)
+#         force_sum = abs(f.x) + abs(f.y) + abs(f.z)
+#         torque_sum = abs(t.x) + abs(t.y) + abs(t.z)
+#         forces_sum.append(force_sum)
+#         torques_sum.append(torque_sum)
+#         print("f, sum(force), sum(torque): ", [f.x, f.y, f.z], force_sum, torque_sum)
 
-        if force_sum > 60:
-            print("FORCE GETING TOO HIGH. STOPPING!")
-            interrupted = True
-            break
+#         if force_sum > 60:
+#             print("FORCE GETING TOO HIGH. STOPPING!")
+#             interrupted = True
+#             break
 
-        left_is_grasp = env.tiago.gripper['left'].is_grasped()
-        right_is_grasp = env.tiago.gripper['right'].is_grasped()
+#         left_is_grasp = env.tiago.gripper['left'].is_grasped()
+#         right_is_grasp = env.tiago.gripper['right'].is_grasped()
         
-        if not left_is_grasp:
-            interrupted = True
-            print("LEFT GRASP LOST. STOPPING!")
-            trajectory_dict['left_grasp_lost'] = i
-            break
+#         if not left_is_grasp:
+#             interrupted = True
+#             print("LEFT GRASP LOST. STOPPING!")
+#             trajectory_dict['left_grasp_lost'] = i
+#             break
         
-        if not right_is_grasp:
-            interrupted = True
-            print("RIGHT GRASP LOST. STOPPING!")
-            trajectory_dict['right_grasp_lost'] = i
-            break
-        # input("press enter")
+#         if not right_is_grasp:
+#             interrupted = True
+#             print("RIGHT GRASP LOST. STOPPING!")
+#             trajectory_dict['right_grasp_lost'] = i
+#             break
+#         # input("press enter")
 
-    # Move the arm up
-    if not interrupted:
-        move_up(env)
-    # ------------------------------------------------------------------------------
+#     # Move the arm up
+#     if not interrupted:
+#         move_up(env)
+#     # ------------------------------------------------------------------------------
     
-    trajectory_dict['forces'] = forces
-    trajectory_dict['torques'] = torques
-    succ = input("Final Task Success. O for Failure and 1 for Success")
-    trajectory_dict["task_succ"] = succ
-    # with open(f'{save_folder}{traj_number}.pickle', 'wb') as handle:
-    #     pickle.dump(trajectory_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-    with open(f'{save_folder}{args.f_name}.pickle', 'wb') as handle:
-        pickle.dump(trajectory_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     trajectory_dict['forces'] = forces
+#     trajectory_dict['torques'] = torques
+#     succ = input("Final Task Success. O for Failure and 1 for Success")
+#     trajectory_dict["task_succ"] = succ
+#     # with open(f'{save_folder}{traj_number}.pickle', 'wb') as handle:
+#     #     pickle.dump(trajectory_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     with open(f'{save_folder}{args.f_name}.pickle', 'wb') as handle:
+#         pickle.dump(trajectory_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-print("interesting_trajectories: ", interesting_trajectories)
+# print("interesting_trajectories: ", interesting_trajectories)

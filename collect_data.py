@@ -9,7 +9,7 @@ from cv_bridge import CvBridge
 import os
 import matplotlib.pyplot as plt
 import pickle
-from tiago_gym import TiagoGym, Listener
+from tiago_control.tiago_gym import TiagoGym, Listener
 from scipy.spatial.transform import Rotation as R
 
 
@@ -51,7 +51,7 @@ if __name__=='__main__':
 
     r = rospy.Rate(10)
     counter = 1
-    save_path = '/home/pal/arpit/tiago_teleop/tiago_control/data/tiago_full_pipeline_3/'
+    save_path = 'data/tiago_tissue_roll_1/'
     os.makedirs(save_path+'color_img', exist_ok=True)
     os.makedirs(save_path+'depth_img', exist_ok=True)
     os.makedirs(save_path+'depth', exist_ok=True)

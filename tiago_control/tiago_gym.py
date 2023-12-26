@@ -4,7 +4,7 @@ import numpy as np
 import rospy
 from threading import Lock
 from collections import OrderedDict
-from transformations import euler_to_quat, quat_to_euler, add_angles
+from tiago_control.transformations import euler_to_quat, quat_to_euler, add_angles
 
 import tf
 from std_msgs.msg import Header
