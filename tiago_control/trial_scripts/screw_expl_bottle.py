@@ -372,10 +372,10 @@ delete_all_marker = Marker()
 delete_all_marker.action = Marker.DELETEALL
 marker_pub.publish(delete_all_marker)
 
-save_folder = f'output/seed_{seed}/'
+save_folder = f'output/bottle/seed_{seed}/'
 os.makedirs(save_folder, exist_ok=True)
 
-counter = 00
+counter = 0
 interesting_trajectories = 0
 for traj_number in range(1):
 

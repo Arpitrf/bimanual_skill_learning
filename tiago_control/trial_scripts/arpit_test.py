@@ -2,6 +2,7 @@ import sys
 import os
 parent_dir = os.path.dirname('/home/pal/arpit/bimanual_skill_learning/tiago_control')
 sys.path.append(parent_dir)
+from utils.camera_utils import Camera
 
 import time
 import rospy
@@ -11,7 +12,7 @@ from control_msgs.msg  import JointTrajectoryControllerState
 from scipy.spatial.transform import Rotation as R
 import pickle
 import matplotlib.pyplot as plt
-
+import cv2
 
 rospy.init_node('tiago_test')
 env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='pal')
@@ -535,12 +536,12 @@ def home_right_hand(env):
 # # ------------------------------------------------------------------------------------------------------------
 
 
-# --------------- Testing depth values ---------------
-with open('/home/pal/arpit/bimanual_skill_learning/data/tiago_tissue_roll_2/depth/0010.pickle', 'rb') as handle:
-    depth_img = pickle.load(handle)
+# # --------------- Testing depth values ---------------
+# with open('/home/pal/arpit/bimanual_skill_learning/data/tiago_tissue_roll_2/depth/0010.pickle', 'rb') as handle:
+#     depth_img = pickle.load(handle)
 
-plt.imshow(depth_img)
-plt.show()
+# plt.imshow(depth_img)
+# plt.show()
 
 # rospy.sleep(2)
 
@@ -619,15 +620,15 @@ plt.show()
 # print("f, torque, sum(force), sum(torque): ", [f.x, f.y, f.z], [t.x, t.y, t.z], abs(f.x) + abs(f.y) + abs(f.z), abs(t.x) + abs(t.y) + abs(t.z))
 
 # # ------------------------------ Random testing -------------------------
-# with open('/home/pal/arpit/tiago_teleop/tiago_control/output/seed_100/q_noise_2.pickle', 'rb') as handle:
-#     traj = pickle.load(handle)
-# print(traj.keys())
-# forces_sum = []
-# torques_sum = []
-# forces = traj['forces']
-# torques = traj['torques']
-# print("len(forces), len(torques): ", len(forces), len(torques))
-# print("left_grasp_lost, right_grasp_lost: ", traj['left_grasp_lost'], traj['right_grasp_lost'])
+with open('/home/pal/arpit/bimanual_skill_learning/output/tissue/seed_0/trial_2.pickle', 'rb') as handle:
+    traj = pickle.load(handle)
+print(traj.keys())
+forces_sum = []
+torques_sum = []
+forces = traj['forces']
+torques = traj['torques']
+print("len(forces), len(torques): ", len(forces), len(torques))
+print("left_grasp_lost, right_grasp_lost: ", traj['left_grasp_lost'], traj['right_grasp_lost'])
 
 # target_s_hat = np.array([0.0, 0.0, 1.0])
 # target_q = np.array([0.55027766, -0.18231454,  1.1236653])
@@ -637,15 +638,39 @@ plt.show()
 # q_dist = np.linalg.norm(q - target_q)
 # print("target_s_hat, s_hat, s_hat_dist: ", target_s_hat, s_hat,  s_hat_dist)
 
-# for i in range(len(forces)):
-#     # print(forces[i])
-#     forces_sum.append(abs(forces[i].x) + abs(forces[i].y) + abs(forces[i].z))
-#     torques_sum.append(abs(torques[i].x) + abs(torques[i].y) + abs(torques[i].z))
-# fig, ax = plt.subplots(1,2)
-# ax[0].set_ylim([0, 70])
-# ax[1].set_ylim([0, 15])
-# ax[0].plot(np.arange(len(forces_sum)), forces_sum)  # Plot the chart 
-# ax[1].plot(np.arange(len(torques_sum)), torques_sum)  # Plot the chart 
+for i in range(len(forces)):
+    # print(forces[i])
+    forces_sum.append(abs(forces[i].x) + abs(forces[i].y) + abs(forces[i].z))
+    torques_sum.append(abs(torques[i].x) + abs(torques[i].y) + abs(torques[i].z))
+fig, ax = plt.subplots(1,2)
+ax[0].set_ylim([0, 70])
+ax[1].set_ylim([0, 15])
+ax[0].plot(np.arange(len(forces_sum)), forces_sum)  # Plot the chart 
+ax[1].plot(np.arange(len(torques_sum)), torques_sum)  # Plot the chart 
+plt.show()
+
+# --------------------------- testing camera -----------------------------
+# top_down_cam = Camera(img_topic="/top_down/color/image_raw", depth_topic="/top_down/aligned_depth_to_color/image_raw")
+# obs = top_down_cam.get_camera_obs()
+# print("obs: ", obs['image'].shape, obs['depth'].shape)
+# rgb = obs['image'].astype(np.uint8)
+# rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB)
+# plt.imshow(rgb)
 # plt.show()
 
+# side_cam = Camera(img_topic="/side_1/color/image_raw", depth_topic="/side_1/aligned_depth_to_color/image_raw")
+# obs = side_cam.get_camera_obs()
+# print("obs: ", obs['color'].shape, obs['depth'].shape)
+# rgb = obs['color'].astype(np.uint8)
+# rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB)
+# plt.imshow(rgb)
+# plt.show()
 
+# ego_cam = Camera(img_topic="/xtion/rgb/image_raw", depth_topic="/xtion/depth/image_raw")
+# obs = ego_cam.get_camera_obs()
+# print("obs: ", obs['color'].shape, obs['depth'].shape)
+# rgb = obs['color'].astype(np.uint8)
+# rgb = cv2.cvtColor(rgb, cv2.COLOR_BGR2RGB)
+# plt.imshow(rgb)
+# plt.show()
+# ------------------------------------------------------------------------

@@ -2,7 +2,6 @@ import time
 import cv2
 import rospy
 import numpy as np
-from real_tiago.user_interfaces.oculus_control import VRPolicy
 from real_tiago.utils.ros_utils import Listener
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
@@ -51,7 +50,7 @@ if __name__=='__main__':
 
     r = rospy.Rate(10)
     counter = 1
-    save_path = 'data/tiago_tissue_roll_1/'
+    save_path = 'data/tiago_tissue_roll_2/'
     os.makedirs(save_path+'color_img', exist_ok=True)
     os.makedirs(save_path+'depth_img', exist_ok=True)
     os.makedirs(save_path+'depth', exist_ok=True)

@@ -18,7 +18,6 @@ def config_parser(parser=None):
     parser.add_argument('--show_screw', action='store_true', default=False, help='Run headless or render')
     return parser
 
-
 args = config_parser().parse_args()
 paths = [f'data/{args.f_name}/hand_poses.pickle']
 
@@ -98,12 +97,25 @@ for path in paths:
     len_hand_pts = len(Ts)
     # ----------------------------------------------------------------------
 
-    # temp using 2 points. TODO: fit a line
+    # Method 1 (temporary method): using 2 points. 
     start_T, end_T = Ts[0], Ts[-1]
-    print("start_T---: ", start_T[:3, 3])
-    print("end_T---: ", end_T[:3, 3])
-    s = np.array(end_T[:3, 3]) - np.array(start_T[:3, 3])
-    print("s: ", s)
+    # print("start_T---: ", start_T[:3, 3])
+    # print("end_T---: ", end_T[:3, 3])
+    # s = np.array(end_T[:3, 3]) - np.array(start_T[:3, 3])
+    # print("s: ", s)
+    # s_hat = s / np.linalg.norm(s)
+    # print("s_hat: ", s_hat)
+
+    # Method 2: fit a line
+    data_points =  []
+    for T in Ts:
+        pos = np.array(T)[:3, 3]
+        data_points.append(pos)
+    data_points = np.array(data_points)
+    datamean = data_points.mean(axis=0)
+    uu, dd, vv = np.linalg.svd(data_points - datamean)
+    print("vv[0]: ", vv[0])
+    s = vv[0]
     s_hat = s / np.linalg.norm(s)
     print("s_hat: ", s_hat)
 
@@ -140,7 +152,7 @@ for path in paths:
     # T0 = start_T
     ax.scatter(T0[0][3], T0[1][3], T0[2][3], color='r', marker='o')
 
-    for theta in np.arange(0.1, 1.0, 0.01):
+    for theta in np.arange(0.015, 0.3, 0.015):
         S_theta = theta * np.array(S)
 
         T1 = np.dot(T0, expm(S_theta))

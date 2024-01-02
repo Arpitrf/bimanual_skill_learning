@@ -399,7 +399,7 @@ class Listener:
 class ForceTorqueSensor(object):
     def __init__(self):
         self.last_msg = None
-        self.ft_reader = Listener(input_topic_name=f'/wrist_right_ft', input_message_type=WrenchStamped)
+        self.ft_reader = Listener(input_topic_name=f'/wrist_right_ft/corrected', input_message_type=WrenchStamped)
         
         # rospy.loginfo(
         #     "Subscribed to: '" + str(self.force_torque_sub.resolved_name) + "' topic.")
