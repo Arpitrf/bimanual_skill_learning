@@ -161,7 +161,7 @@ def get_points_prismatic(s_hat, initial_pose, dist_moved=0.2):
     # ax.scatter(T0[0][3], T0[1][3], T0[2][3], color='r', marker='o')
     
     final_points = []
-    for theta in np.arange(0.015, 0.25, 0.015):
+    for theta in np.arange(0.015, 0.28, 0.015):
         S_theta = theta * np.array(S)
 
         T1 = np.dot(T0, expm(S_theta))
@@ -274,15 +274,15 @@ print("s_hat, q: ", s_hat_perception, q_perception)
 # right_eef_quat_pre = right_eef_quat
 
 # OPPOSITE: PUT TISSUE ROLL INSIDE THE BOX
-left_eef_pos_pre = np.array([ 0.65649884,  0.18572625,  1.0980576])
+left_eef_pos_pre = np.array([ 0.55649884,  0.18572625,  1.0980576])
 left_eef_quat_pre = np.array([-0.02219701, -0.68567074, -0.01472104, -0.72742438])
-left_eef_pos = np.array([ 0.65649884,  0.18572625,  0.9980576])
+left_eef_pos = np.array([ 0.55649884,  0.18572625,  0.9980576])
 left_eef_quat = np.array([-0.02219701, -0.68567074, -0.01472104, -0.72742438])
 
 # Right hand: Set initial pose to a default value
-right_eef_pos_pre = np.array([ 0.63833026, -0.28831653,  1.14224477])
+right_eef_pos_pre = np.array([ 0.53833026, -0.35831653,  1.14224477])
 right_eef_quat_pre = np.array([ -0.70846779,  0.01949789,  0.70543538, -0.00735917])
-right_eef_pos = np.array([ 0.63833026, -0.28831653,  1.00224477])
+right_eef_pos = np.array([ 0.53833026, -0.35831653,  1.00224477])
 right_eef_quat= np.array([ -0.70846779,  0.01949789,  0.70543538, -0.00735917])
 
 
@@ -303,7 +303,7 @@ delete_all_marker = Marker()
 delete_all_marker.action = Marker.DELETEALL
 marker_pub.publish(delete_all_marker)
 
-save_folder = f'output/tissue_insert/seed_{seed}/'
+save_folder = f'output/tissue_insert_3/seed_{seed}/'
 os.makedirs(save_folder, exist_ok=True)
 
 # Start recorder
@@ -323,7 +323,7 @@ for traj_number in range(1):
 
     # ------------------- Obtain the screw axis and the trajectory -------------------------
     # Adding noise to s_hat. This noise can have a larger variance.
-    noise = np.random.uniform(low=-0.6, high=0.6, size=(2,))
+    noise = np.random.uniform(low=-0.2, high=0.2, size=(2,))
     noise = np.append(noise, 0.0)
     # remove later 
     # noise = np.array([0.0, 0.0, 0.0])
@@ -337,11 +337,26 @@ for traj_number in range(1):
     # trial_1
     # s_hat  = np.array([ 0.22351376, -0.97463263, -0.01152569])
     # trial_2
-    s_hat = np.array([-0.34470958, -0.93813842,  0.03273554])
+    # s_hat = np.array([-0.34470958, -0.93813842,  0.03273554])
     # trial_3
     # s_hat = np.array([-0.65976221, -0.75094882,  0.0281014 ])
+    # trial_4
+    # s_hat = np.array([ 0.33409237, -0.94224078,  0.02376147])
+
+    # trial_1
+    s = np.array([0.1, 1.0, 0.0])
+    # # trial_2
+    # s = np.array([0.35, 1.0, 0.0 ])
+    # # trial_3
+    # s = np.array([0.55, 1.0, 0.0 ])
+    # # trial_4
+    # s = np.array([-0.3, 1.0, 0.0 ])
+    # # trial_5
+    # s = np.array([-0.5, 1.0, 0.0 ])
     
-    s_hat = -s_hat
+    
+    s_hat = s / np.linalg.norm(s)
+    # s_hat = -s_hat
     q = right_eef_pos
 
     # -----------------------------------------------
@@ -460,8 +475,8 @@ for traj_number in range(1):
         val = ft.ft_reader.get_most_recent_msg()
         f = val.wrench.force
         t = val.wrench.torque
-        forces.append(f)
-        torques.append(t)
+        forces.append(np.array([f.x, f.y, f.z]))
+        torques.append(np.array([t.x, t.y, t.z]))
         force_sum = abs(f.x) + abs(f.y) + abs(f.z)
         torque_sum = abs(t.x) + abs(t.y) + abs(t.z)
         forces_sum.append(force_sum)
@@ -496,12 +511,12 @@ for traj_number in range(1):
     # time.sleep(15)
 
     # open gripper again
+    print("------------- ROBOT TRAJ COMPLETED -------------")
     rospy.sleep(1)
     env.tiago.gripper['left'].write(1)
     env.tiago.gripper['right'].write(0)
     rospy.sleep(1)
 
-   
     if args.record:
         recorder.pause_recording()
         recorder.save_video(save_folder, args)
