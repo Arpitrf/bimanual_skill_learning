@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-folder = "/home/pal/arpit/bimanual_skill_learning/output/tissue_insert_3/seed_0/"
+folder = "/home/pal/arpit/bimanual_skill_learning/output/tissue_insert_far/seed_0/"
+# folder = "/home/pal/arpit/bimanual_skill_learning/output/bottle/seed_0/"
 fig, ax = plt.subplots(1,2)
 ax[0].set_ylim([0, 70])
 ax[1].set_ylim([0, 15])

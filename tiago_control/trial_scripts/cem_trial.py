@@ -101,7 +101,7 @@ def updateUniformParams(lis):
 
 seed = 9
 np.random.seed(seed)
-with open('/home/arpit/test_projects/tiago_teleop/tiago_control/data/tiago_full_pipeline_3/axis.pickle', 'rb') as handle:
+with open('/home/pal/arpit/bimanual_skill_learning/data/tiago_full_pipeline_3/axis.pickle', 'rb') as handle:
     axis = pickle.load(handle)
 q_perception = np.array(axis['q'])
 s_hat_perception = np.array(axis['s_hat'])
@@ -197,8 +197,8 @@ for epoch in range(5):
         traj_score = (trajectory_pos_dist, trajectory_orn_dist2)
         # traj_score = trajectory_pos_dist + trajectory_orn_dist2
         # temp_lis.append((epoch, traj_number, trajectory_pos_dist, trajectory_orn_dist2))
-        if trajectory_pos_dist < 1.5 and trajectory_orn_dist2 < 0.2:
-            print("q: ", epoch, traj_number, q, s_hat, trajectory_pos_dist, trajectory_orn_dist2)
+        # if trajectory_pos_dist < 1.5 and trajectory_orn_dist2 < 0.2:
+        print("q: ", epoch, traj_number, q, s_hat, trajectory_pos_dist, trajectory_orn_dist2)
 
         test_traj = np.array(test_traj)
         # print("test_traj: ", np.array(test_traj).shape, traj_score)

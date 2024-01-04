@@ -17,25 +17,25 @@ import cv2
 rospy.init_node('tiago_test')
 env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='pal')
 
-# # -------------- ---- Print the current pose --------------------
-# right_eef_pose, left_eef_pose = None, None
-# while right_eef_pose is None or left_eef_pose is None:
-#     right_eef_pose = env._observation()['right_eef']
-#     left_eef_pose = env._observation()['left_eef']
-#     right_gripper_state = env._observation()['right_gripper']
-#     left_gripper_state = env._observation()['left_gripper']
-#     # print("right_gripper, left_gripper: ", right_gripper_state, left_gripper_state)
+# -------------- ---- Print the current pose --------------------
+right_eef_pose, left_eef_pose = None, None
+while right_eef_pose is None or left_eef_pose is None:
+    right_eef_pose = env._observation()['right_eef']
+    left_eef_pose = env._observation()['left_eef']
+    right_gripper_state = env._observation()['right_gripper']
+    left_gripper_state = env._observation()['left_gripper']
+    # print("right_gripper, left_gripper: ", right_gripper_state, left_gripper_state)
 
-# right_eef_pos, right_eef_orn_quat = right_eef_pose[:3], right_eef_pose[3:]
-# print("right pose: ", right_eef_pose)
-# right_eef_orn_euler = R.from_quat(right_eef_orn_quat).as_euler('XYZ', degrees=True)
-# print("right_eef_orn_euler: ", right_eef_orn_euler)
+right_eef_pos, right_eef_orn_quat = right_eef_pose[:3], right_eef_pose[3:]
+print("right pose: ", right_eef_pose)
+right_eef_orn_euler = R.from_quat(right_eef_orn_quat).as_euler('XYZ', degrees=True)
+print("right_eef_orn_euler: ", right_eef_orn_euler)
 
-# left_eef_pos, left_eef_orn_quat = left_eef_pose[:3], left_eef_pose[3:]
-# print("left pose: ", left_eef_pose)
-# left_eef_orn_euler = R.from_quat(left_eef_orn_quat).as_euler('XYZ', degrees=True)
-# print("left_eef_orn_euler: ", left_eef_orn_euler)
-# # ----------------------------------------------------------------
+left_eef_pos, left_eef_orn_quat = left_eef_pose[:3], left_eef_pose[3:]
+print("left pose: ", left_eef_pose)
+left_eef_orn_euler = R.from_quat(left_eef_orn_quat).as_euler('XYZ', degrees=True)
+print("left_eef_orn_euler: ", left_eef_orn_euler)
+# ----------------------------------------------------------------
 
 # for _ in range(1000):
 #     # print("proprio values: ", env._observation())
@@ -620,34 +620,34 @@ def home_right_hand(env):
 # print("f, torque, sum(force), sum(torque): ", [f.x, f.y, f.z], [t.x, t.y, t.z], abs(f.x) + abs(f.y) + abs(f.z), abs(t.x) + abs(t.y) + abs(t.z))
 
 # # ------------------------------ Random testing -------------------------
-with open('/home/pal/arpit/bimanual_skill_learning/output/tissue/seed_0/trial_2.pickle', 'rb') as handle:
-    traj = pickle.load(handle)
-print(traj.keys())
-forces_sum = []
-torques_sum = []
-forces = traj['forces']
-torques = traj['torques']
-print("len(forces), len(torques): ", len(forces), len(torques))
-print("left_grasp_lost, right_grasp_lost: ", traj['left_grasp_lost'], traj['right_grasp_lost'])
+# with open('/home/pal/arpit/bimanual_skill_learning/output/tissue/seed_0/trial_2.pickle', 'rb') as handle:
+#     traj = pickle.load(handle)
+# print(traj.keys())
+# forces_sum = []
+# torques_sum = []
+# forces = traj['forces']
+# torques = traj['torques']
+# print("len(forces), len(torques): ", len(forces), len(torques))
+# print("left_grasp_lost, right_grasp_lost: ", traj['left_grasp_lost'], traj['right_grasp_lost'])
 
-# target_s_hat = np.array([0.0, 0.0, 1.0])
-# target_q = np.array([0.55027766, -0.18231454,  1.1236653])
-# s_hat = traj['s_hat']
-# q = traj['q']
-# s_hat_dist = np.dot(s_hat, target_s_hat)
-# q_dist = np.linalg.norm(q - target_q)
-# print("target_s_hat, s_hat, s_hat_dist: ", target_s_hat, s_hat,  s_hat_dist)
+# # target_s_hat = np.array([0.0, 0.0, 1.0])
+# # target_q = np.array([0.55027766, -0.18231454,  1.1236653])
+# # s_hat = traj['s_hat']
+# # q = traj['q']
+# # s_hat_dist = np.dot(s_hat, target_s_hat)
+# # q_dist = np.linalg.norm(q - target_q)
+# # print("target_s_hat, s_hat, s_hat_dist: ", target_s_hat, s_hat,  s_hat_dist)
 
-for i in range(len(forces)):
-    # print(forces[i])
-    forces_sum.append(abs(forces[i].x) + abs(forces[i].y) + abs(forces[i].z))
-    torques_sum.append(abs(torques[i].x) + abs(torques[i].y) + abs(torques[i].z))
-fig, ax = plt.subplots(1,2)
-ax[0].set_ylim([0, 70])
-ax[1].set_ylim([0, 15])
-ax[0].plot(np.arange(len(forces_sum)), forces_sum)  # Plot the chart 
-ax[1].plot(np.arange(len(torques_sum)), torques_sum)  # Plot the chart 
-plt.show()
+# for i in range(len(forces)):
+#     # print(forces[i])
+#     forces_sum.append(abs(forces[i].x) + abs(forces[i].y) + abs(forces[i].z))
+#     torques_sum.append(abs(torques[i].x) + abs(torques[i].y) + abs(torques[i].z))
+# fig, ax = plt.subplots(1,2)
+# ax[0].set_ylim([0, 70])
+# ax[1].set_ylim([0, 15])
+# ax[0].plot(np.arange(len(forces_sum)), forces_sum)  # Plot the chart 
+# ax[1].plot(np.arange(len(torques_sum)), torques_sum)  # Plot the chart 
+# plt.show()
 
 # --------------------------- testing camera -----------------------------
 # top_down_cam = Camera(img_topic="/top_down/color/image_raw", depth_topic="/top_down/aligned_depth_to_color/image_raw")

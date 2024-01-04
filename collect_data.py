@@ -50,7 +50,7 @@ if __name__=='__main__':
 
     r = rospy.Rate(10)
     counter = 1
-    save_path = 'data/tiago_tissue_roll_2/'
+    save_path = 'data/tiago_bottle_7/'
     os.makedirs(save_path+'color_img', exist_ok=True)
     os.makedirs(save_path+'depth_img', exist_ok=True)
     os.makedirs(save_path+'depth', exist_ok=True)
@@ -76,8 +76,8 @@ if __name__=='__main__':
         color_img = img_listener.get_most_recent_msg()
         # print('img', img.shape)
         depth_img = depth_listener.get_most_recent_msg()
-        cv2.imshow('img', color_img)
-        cv2.imshow('depth', depth_img)
+        # cv2.imshow('img', color_img)
+        # cv2.imshow('depth', depth_img)
         # fig, ax = plt.subplots(1,2)
         # ax[0].imshow(color_img)
         # ax[1].imshow(depth_img)
@@ -92,7 +92,7 @@ if __name__=='__main__':
         cv2.imwrite(f'{save_path}depth_img/{counter:04d}.jpg', depth_img)
 
         counter += 1
-        cv2.waitKey(10)
+        # cv2.waitKey(10)
         # r.sleep()
 
     

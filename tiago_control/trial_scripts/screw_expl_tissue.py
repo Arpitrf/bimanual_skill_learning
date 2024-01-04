@@ -303,7 +303,7 @@ delete_all_marker = Marker()
 delete_all_marker.action = Marker.DELETEALL
 marker_pub.publish(delete_all_marker)
 
-save_folder = f'output/tissue_insert_3/seed_{seed}/'
+save_folder = f'output/tissue_insert_far/seed_{seed}/'
 os.makedirs(save_folder, exist_ok=True)
 
 # Start recorder
@@ -344,7 +344,7 @@ for traj_number in range(1):
     # s_hat = np.array([ 0.33409237, -0.94224078,  0.02376147])
 
     # trial_1
-    s = np.array([0.1, 1.0, 0.0])
+    # s = np.array([0.1, 1.0, 0.0])
     # # trial_2
     # s = np.array([0.35, 1.0, 0.0 ])
     # # trial_3
@@ -352,7 +352,7 @@ for traj_number in range(1):
     # # trial_4
     # s = np.array([-0.3, 1.0, 0.0 ])
     # # trial_5
-    # s = np.array([-0.5, 1.0, 0.0 ])
+    s = np.array([-0.5, 1.0, 0.0 ])
     
     
     s_hat = s / np.linalg.norm(s)

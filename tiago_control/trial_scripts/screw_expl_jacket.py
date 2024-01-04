@@ -16,6 +16,16 @@ from geometry_msgs.msg import Point, Vector3
 from argparse import ArgumentParser
 from utils.camera_utils import Camera, RecordVideo
 
+def move_up(env, hand='left_eef'):
+    rospy.sleep(2)
+    eef_pose = env._observation()[hand]
+    eef_pos, eef_quat = eef_pose[:3], eef_pose[3:]
+    # move up by 5 cm
+    eef_pos[2] += 0.05
+    pose_command = env.tiago.create_pose_command(eef_pos, eef_quat)
+    # print("---", hand.split('_')[0])
+    env.tiago.tiago_pose_writer[hand.split('_')[0]].write(pose_command)
+    rospy.sleep(5)
 
 def config_parser(parser=None):
     if parser is None:
@@ -135,15 +145,8 @@ def publish_line_marker(marker_pub, axis, q, counter):
 
     marker_pub.publish(marker)
 
-def get_points_prismatic(s_hat, q, intial_pose, dist_moved=0.2):
-    # Calculate the twist vector
-    h = np.inf # pure translation
-    w = np.array([0, 0, 0])
-    v = np.array(s_hat)
-    twist = np.concatenate((w,v)) 
-    # twist = [0, 0, 0, 1, 0, 0]
-    print("twist: ", twist)
-
+def get_points_prismatic(s_hat, initial_pose, dist_moved=0.2):
+    twist = [0, 0, 0] + s_hat.tolist()
     w = twist[:3]
     w_matrix = [
         [0, -w[2], w[1]],
@@ -159,61 +162,31 @@ def get_points_prismatic(s_hat, q, intial_pose, dist_moved=0.2):
         [0, 0, 0, 0]
     ]
 
+    # initial pose
+    T0 = np.array([[1, 0, 0, initial_pose[0,3]],
+        [0, 1, 0, initial_pose[1,3]],
+        [0, 0, 1, initial_pose[2,3]],
+        [0, 0, 0, 1]])
+    # T0 = start_T
+    # ax.scatter(T0[0][3], T0[1][3], T0[2][3], color='r', marker='o')
+    
     final_points = []
-    # Calculate the transformation of the point when moved by theta along the screw axis
-    for theta in np.arange(0, dist_moved, 0.1):
+    for theta in np.arange(0.015, 0.28, 0.015):
         S_theta = theta * np.array(S)
 
         T1 = np.dot(T0, expm(S_theta))
+        T1 = np.array([
+            [initial_pose[0][0], initial_pose[0][1], initial_pose[0][2], T1[0,3]],
+            [initial_pose[1][0], initial_pose[1][1], initial_pose[1][2], T1[1,3]],
+            [initial_pose[2][0], initial_pose[2][1], initial_pose[2][2], T1[2,3]],
+            [0, 0, 0, 1]
+        ])
         final_points.append(T1)
-        # T1 = np.dot(expm(S_theta), T0)
-
-    return final_points
-
-
-def get_points_revolute(s_hat, q, initial_pose, angle_moved=4.0):
-    # Calculate the twist vector
-    h = 0 # pure rotation
-    w = s_hat
-    v = -np.cross(s_hat, q)
-    twist = np.concatenate((w,v)) 
-    # print("twist: ", twist)
-
-    # Calculate the matrix form of the twist vector
-    w = twist[:3]
-    # w_matrix = R.from_rotvec(w).as_matrix()
-    w_matrix = [
-        [0, -w[2], w[1]],
-        [w[2], 0, -w[0]],
-        [-w[1], w[0], 0],
-    ]
-    # print("w_matrix: ", w_matrix)
-
-    S = [
-        [w_matrix[0][0], w_matrix[0][1], w_matrix[0][2], twist[3]],
-        [w_matrix[1][0], w_matrix[1][1], w_matrix[1][2], twist[4]],
-        [w_matrix[2][0], w_matrix[2][1], w_matrix[2][2], twist[5]],
-        [0, 0, 0, 0]
-    ]
-
-    final_points = []
-    # Calculate the transformation of the point when moved by theta along the screw axis
-    for theta in np.arange(0, angle_moved, 0.2):
-        S_theta = theta * np.array(S)
-        # print("S_theta: ", S_theta)
-
-        # T1 = np.dot(T0, expm(S_theta))
-        T1 = np.dot(expm(S_theta), T0)
-        final_points.append(T1)
-
-        # printing
-        T1_mat = T1[:3,:3]
-        T1_euler = R.from_matrix(T1_mat).as_euler('XYZ')
         print("T1 POS: ", T1[0:3,3])
-        # print("T1 ROT: ", T1_euler)
-        # print("------")
+
+        # T1 = np.dot(expm(S_theta), T0)
         # ax.scatter(T1[0][3], T1[1][3], T1[2][3], color='g', marker='o')
-    
+        
     return final_points
 
 def wait_right(desired_pos, env):
@@ -237,13 +210,11 @@ def wait_left(desired_pos, env):
         if (error < 0.01).all() or time_diff > 30:
             break
 
-def home_right_hand(env):
-    pos = np.array([-0.02927815, -0.44696712,  1.11367162])
-    quat = np.array([-0.62445749, -0.55287778, -0.39586573,  0.38427767])
-    
-    # New Home Pose: [ 0.4383153  -0.47736873  1.26197116  0.6875126   0.26625633 -0.45903672 0.49570079]
-    pos = np.array([0.4383153,  -0.47736873,  1.26197116])
-    quat = np.array([0.6875126,  0.26625633, -0.45903672, 0.49570079])
+def home_right_hand(env):  
+#     [ 0.55727367 -0.45815103  1.16181563  0.75473021 -0.11066493 -0.51583154
+#  -0.38994027]  
+    pos = np.array([0.55727367, -0.45815103,  1.16181563 ])
+    quat = np.array([0.75473021, -0.11066493, -0.51583154, -0.38994027])
     pose_command = env.tiago.create_pose_command(pos, quat)
     env.tiago.tiago_pose_writer['right'].write(pose_command)
     wait_right(pos, env)
@@ -252,56 +223,17 @@ def home_right_hand(env):
     # print("error: ", abs(pos - right_eef_pose[:3]))
 
 def home_left_hand(env):
-    # pos = np.array([-0.02635916,  0.45657024,  1.32772584])
-    # quat = np.array([0.38418642,  0.39585825,  0.55286772, -0.62452728])
+    pos = np.array([0.44245209,  0.59514704,  1.16818457])
+    quat = np.array([0.20890626, -0.54033101, -0.29681984, -0.7591433 ])
+    # for tissue 2:
+    # quat = np.array([-0.76373052, -0.28579711,  0.54594994, -0.1922872 ])
     
-    # New Home Pose: [ 0.45367934  0.4771977   1.04679635  0.45480808 -0.15021598  0.17083846 -0.86104529]
-    pos = np.array([0.50367934,  0.4771977,   1.04679635])
-    quat = np.array([0.45480808, -0.15021598,  0.17083846, -0.86104529])
     pose_command = env.tiago.create_pose_command(pos, quat)
     env.tiago.tiago_pose_writer['left'].write(pose_command)
     wait_left(pos, env)
     left_eef_pose = env._observation()['left_eef']
     # print("Actual left_eef_pos: ", left_eef_pose[:3])
     # print("error: ", abs(pos - left_eef_pose[:3]))
-
-def move_up(env, hand='right_eef'):
-    rospy.sleep(2)
-    eef_pose = env._observation()[hand]
-    eef_pos, eef_quat = eef_pose[:3], eef_pose[3:]
-    # move up by 5 cm
-    eef_pos[2] += 0.05
-    pose_command = env.tiago.create_pose_command(eef_pos, eef_quat)
-    # print("---", hand.split('_')[0])
-    env.tiago.tiago_pose_writer[hand.split('_')[0]].write(pose_command)
-    rospy.sleep(5)
-
-def plot_axis(ax, q, axis, c='b'):
-    length = 2
-    endpoint_1 = q + length * axis
-    endpoint_2 = q - length * axis
-    ax.plot([endpoint_2[0], endpoint_1[0]], [endpoint_2[1], endpoint_1[1]], [endpoint_2[2], endpoint_1[2]], c=c)
-    plt.show()
-    # plt.pause(1)
-
-def check_traj_quality(traj_points):
-    x_range = [0.4, 0.8]
-    y_range = [-0.28, -0.06]
-    z_range = [1.05, 1.18]
-    quality = 'good'
-    for pose in traj_points:
-        point = pose[0:3,3]
-        if point[0] > x_range[0] and point[0] < x_range[1] and \
-                point[1] > y_range[0] and point[1] < y_range[1] and \
-                point[2] > z_range[0] and point[2] < z_range[1]:
-            quality = 'good'
-        else:
-            quality = 'bad'
-            break
-    if quality == 'bad':
-        return False
-    else:
-        return True
 
 
 # Initializations
@@ -316,52 +248,29 @@ side_cam = Camera(img_topic="/side_1/color/image_raw", depth_topic="/side_1/alig
 top_down_cam = Camera(img_topic="/top_down/color/image_raw", depth_topic="/top_down/aligned_depth_to_color/image_raw")
 ego_cam = Camera(img_topic="/xtion/rgb/image_raw", depth_topic="/xtion/depth/image_raw")
 
-
 # Obtain axis from perception
 # with open('/home/pal/arpit/tiago_teleop/tiago_control/data/tiago_full_pipeline_3/extrinsic.pickle', 'rb') as handle:
 #     extr = pickle.load(handle)
-with open('/home/pal/arpit/tiago_teleop/tiago_control/data/tiago_full_pipeline_3/axis.pickle', 'rb') as handle:
+with open('/home/pal/arpit/bimanual_skill_learning/data/tiago_tissue_roll_1/axis.pickle', 'rb') as handle:
     axis = pickle.load(handle)
 q_perception = np.array(axis['q'])
 s_hat_perception = np.array(axis['s_hat'])
 print("s_hat, q: ", s_hat_perception, q_perception)
 
-# # Create a 3D axis
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# ax.set_xlabel('X-axis')
-# ax.set_ylabel('Y-axis')
-# ax.set_zlabel('Z-axis')  
-# ax.set_xlim([0.3, 0.9])
-# ax.set_ylim([-0.2, 0.2])
-# ax.set_zlim([0.5, 1])
-# plot_axis(ax, q_perception, s_hat_perception, c='r')
-
 # ------------------------- Hardcoding grasp poses --------------------------
+# Horizontal:
 # Left hand: Set initial pose to a default value
-# bottle_right_pose
-left_eef_pos_pre = np.array([ 0.54033371,  0.20095334,  0.79674643])
-left_eef_quat_pre = np.array([ 0.43567574, -0.54655992,  0.44715073, -0.5581354])
-left_eef_pos = np.array([ 0.54033371,  0.02095334,  0.79674643])
-left_eef_quat= np.array([ 0.43567574, -0.54655992,  0.44715073, -0.5581354])
+left_eef_pos = np.array([ 0.64515396,  0.16954572,  0.95255857]) + np.array([0.0, 0.0, -0.015])
+left_eef_quat = np.array([-0.0524539,  -0.67582998, -0.00476538, -0.73517326])
+left_eef_pos_pre = left_eef_pos + np.array([0, 0, 0.1])
+left_eef_quat_pre = left_eef_quat
 
-# # bottle middle pose
-# left_eef_pos_pre = np.array([ 0.61691971,  0.25651524,  0.78789944])
-# left_eef_quat_pre = np.array([ 0.5509148,  -0.47211483, 0.39456799, -0.56384091])
-# left_eef_pos = np.array([ 0.61691971,  0.17651524,  0.78789944])
-# left_eef_quat= np.array([ 0.5509148,  -0.47211483, 0.39456799, -0.56384091])
+# # Right hand: Set initial pose to a default value
+right_eef_pos = np.array([ 0.58752687, -0.01694048,  1.00036204])
+right_eef_quat= np.array([ 0.60564992,  0.40772559, -0.4305285, 0.53065358])
+right_eef_pos_pre = right_eef_pos + np.array([0, 0, 0.1])
+right_eef_quat_pre = right_eef_quat
 
-
-# Right hand: Set initial pose to a default value
-# bottle right 1
-right_eef_pos = np.array([ 0.55027766, -0.18231454,  1.1236653])
-right_eef_quat= np.array([ 0.69611122, -0.02994237, -0.71498465, -0.05770246])
-# bottle middle pose - bad
-# right_eef_pos = np.array([ 0.52753508, -0.03749103,  1.08782991])
-# right_eef_quat= np.array([ 0.64279886,  0.4249718, -0.30581209, 0.55918472])
-# bottle middle pose - good
-# right_eef_pos = np.array([ 0.63405218, -0.05241308,  1.112755642])
-# right_eef_quat= np.array([ 0.43944521,  0.5750991,  -0.31518151, 0.61384815])
 
 # Initial pose
 right_eef_mat = R.from_quat(right_eef_quat).as_matrix()
@@ -380,7 +289,7 @@ delete_all_marker = Marker()
 delete_all_marker.action = Marker.DELETEALL
 marker_pub.publish(delete_all_marker)
 
-save_folder = f'output/bottle/seed_{seed}/'
+save_folder = f'output/jacket/seed_{seed}/'
 os.makedirs(save_folder, exist_ok=True)
 
 # Start recorder
@@ -400,103 +309,53 @@ for traj_number in range(1):
 
     # ------------------- Obtain the screw axis and the trajectory -------------------------
     # Adding noise to s_hat. This noise can have a larger variance.
-    noise = np.random.uniform(low=-0.1, high=0.1, size=(3,))
+    noise = np.random.uniform(low=-0.2, high=0.2, size=(2,))
+    noise = np.append(noise, 0.0)
     # remove later 
     # noise = np.array([0.0, 0.0, 0.0])
-    # print("noise for s_hat: ", noise)
+    print("noise for s_hat: ", noise)
     s = s_hat_perception + noise
     s_hat = s / np.linalg.norm(s)
-    # Adding noise to q. This noise should have a smaller variance.
-    noise = np.random.normal(0, 0.05, 3)
-    # print("noise for q: ", noise)
-    # noise = np.array([0.0, 0.0, 0.0])
-    # print("noise for q: ", noise)
-    q = q_perception + noise
-    # plot_axis(ax, q, s_hat)
-    # -------------- some hardcoded axes --------------
-    # s_hat, q = np.array([-0.10081928, -0.04468542,  0.99390074]), np.array([ 0.65978671, -0.12453725,  0.13383721])
-    # 24: 
-    # s_hat, q = np.array([-0.14850926, -0.05133752,  0.98757757]), np.array([ 0.66089114, -0.20330914,  0.10375334])
-    # 11: 
-    # s_hat, q = np.array([-0.07162658, -0.11507394,  0.99077123]), np.array([ 0.62366923, -0.11807472,  0.13683665])
-    # # 4: 
-    # s_hat, q = np.array([-0.23421685, -0.01005412,  0.97213239]), np.array([ 0.74578873, -0.12387543,  0.15782001])
-    # # 14: 
-    # s_hat, q = np.array([-0.11020542, -0.03296062,  0.99336215]), np.array([ 0.72305601, -0.20245814,  0.1171972 ])
-    # 15
-    # s_hat, q = np.array([-0.07686291,  0.00660992,  0.99701976]), np.array([ 0.71670167, -0.17766795,  0.04005383])
-    # From the offline experiment - worked well
-    # s_hat, q = np.array([-0.07537131, -0.10596028,  0.99150975]), np.array([ 0.57661343, -0.08957348,  0.11892584]) # 1.42, 0.19
-    # s_hat, q = np.array([-0.11124864,  0.00892458,  0.99375253]), np.array([ 0.67924664, -0.19549993,  0.12938142]) # 0.49, 0.14
-    # after tooltip_ee_offset
-    # s_hat, q = np.array([-0.08816754, -0.02153198,  0.99587291]), np.array([ 0.59708694, -0.16966684,  0.13509701])
-    
-    # trial 2 (0, 4) - Good 0.311, 0.069
-    # s_hat, q = np.array([-0.07296414, -0.02632962,  0.99698695]), np.array([ 0.58814249, -0.14366633,  0.20695057])
-    # trial 1 (0, 17) - Goodish 1.412, 0.196 
-    # s_hat, q = np.array([-0.0912213,  -0.09355492,  0.99142632]), np.array([ 0.57444014, -0.06673279,  0.11108433])
-    # trial 3 (0, 6) - Goodish 1.352, 0.110 
-    # s_hat, q = np.array([-0.08974382, -0.03931094,  0.99518877]), np.array([ 0.65867812, -0.1221976,   0.099134 ])
-    # trial 4 (0, 5) - Goodish 1.698, 0.186
-    # s_hat, q = np.array([-0.1263994,  -0.01573022,  0.9918547 ]), np.array([ 0.5919598,  -0.2103789,   0.18964259]) 
-    # trial 5 Bad 2.380 0.412
-    s_hat, q = np.array([-0.07385186, -0.17440865,  0.98189996]), np.array([ 0.68489215, -0.05320495,  0.14008214]) 
-    # trial 6 Bad  4.180 0.169
-    # s_hat, q = np.array([-0.10365334, -0.06341209,  0.99258999]), np.array([ 0.74633728, -0.20999397,  0.14893376]) 
-    # trial 7 Bad 6.191 0.864 
-    # s_hat, q = np.array([-0.25974761, -0.08710759,  0.9617398 ]), np.array([ 0.57954888, -0.23462,     0.03248047]) 
+    # No need to add noise to q here as the axis will definitely pass through the first pose (grasp pose) which we already have.
 
     # ideal_1
-    # s_hat = np.array([0.0, 0.0, 1.0])
-    # q = right_eef_pos
+    # s_hat = np.array([0.0, -1.0, 0.0])
+    # trial_1
+    # s_hat  = np.array([ 0.22351376, -0.97463263, -0.01152569])
+    # trial_2
+    # s_hat = np.array([-0.34470958, -0.93813842,  0.03273554])
+    # trial_3
+    # s_hat = np.array([-0.65976221, -0.75094882,  0.0281014 ])
+    # trial_4
+    # s_hat = np.array([ 0.33409237, -0.94224078,  0.02376147])
 
-    # s_hat_noise_1
-    # s_hat = np.array([-0.10081928, -0.04468542,  0.99390074])
-    # s_hat_noise_2
-    # s_hat = np.array([-0.07686291,  0.00660992,  0.99701976])
-    # s_hat_noise_3
-    # s_hat = np.array([-0.08383039, -0.04167278,  0.99560828])
-    # s_hat = [-0.06359817  0.00858564  0.99793866]
-    # s_hat_noise_4
-    # s_hat = np.array([-0.16704007, -0.08923226,  0.98190388])
-    # s_hat_noise_5
-    # s_hat = np.array([-0.14850926, -0.05133752,  0.98757757])
+    # trial_1
+    # s = np.array([-0.1, -1.0, 0.0])
+    # # trial_2
+    # s = np.array([-0.35, -1.0, 0.0 ])
+    # # trial_3
+    s = np.array([-0.55, -0.8, 0.0 ])
+    # # trial_4
+    # s = np.array([-0.3, 1.0, 0.0 ])
+    # # trial_5
+    # s = np.array([-0.5, 1.0, 0.0 ])
+    
+    
+    s_hat = s / np.linalg.norm(s)
+    # s_hat = -s_hat
+    q = right_eef_pos
 
-    # q = right_eef_pos
-    # noise = np.random.normal(0, 0.05, 3)
-    # q = q + noise
-    # q = location of the bottle
-    # q = np.array([0.535, -0.165, 0.736])
-    # q_noise_1 = 0.044
-    # q = np.array([ 0.57601367, -0.14757171,  1.13192928])
-    # # q_noise_2 = 0.145
-    # q = np.array([ 0.46980572, -0.08515143,  1.05129349])
-    # q_noise 3 = 0.01
-    # q = np.array([0.54, -0.17, 1.12])
     # -----------------------------------------------
-    print("----------- final s_hat, q: ", s_hat, q)
-    target_q = np.array([0.55027766, -0.18231454,  1.1236653])
-    q_dist = np.linalg.norm(q[:2] - target_q[:2])
-    print("q_dist: ", q_dist)
+    print("----------- final s_hat: ", s_hat)
     trajectory_dict['s_hat'] = s_hat
-    trajectory_dict['q'] = q
     publish_line_marker(marker_pub, s_hat, q, counter)
     counter += 2
 
-    final_points = get_points_revolute(s_hat, q, T0)
+    final_points = get_points_prismatic(s_hat, T0)
     trajectory_dict['final_points'] = final_points
-    
-    # keep_traj = check_traj_quality(final_points)
-    # print("keep_traj: ", keep_traj)
-    # if not keep_traj:
-    #     continue
-    # interesting_trajectories += 1
-    # if traj_number < 5:
-    #     continue
-
-    # -------------------------------------------------------------------------------------------
 
     # Open gripper and go home
+    move_up(env)
     rospy.sleep(1)
     env.tiago.gripper['left'].write(1)
     env.tiago.gripper['right'].write(0)
@@ -506,6 +365,10 @@ for traj_number in range(1):
     home_right_hand(env)
 
     # -------- Make left gripper go to pose and grasp ---------------
+    # Close gripper
+    rospy.sleep(1)
+    env.tiago.gripper['left'].write(0)
+    
     # Pregrasp pose
     pose_command = env.tiago.create_pose_command(left_eef_pos_pre, left_eef_quat_pre)
     print("Left Hand Going To Pose")
@@ -527,13 +390,21 @@ for traj_number in range(1):
     left_eef_pose = env._observation()['left_eef']
     print("LEFT HAND: Desired and Actual left_eef_pos: ", left_eef_pos, left_eef_pose[:3])
     print("LEFT HAND: error in position: ", abs(left_eef_pos - left_eef_pose[:3]))
-
-    # Close gripper
-    rospy.sleep(1)
-    env.tiago.gripper['left'].write(0)
     #-----------------------------------------------------------------
 
     # --------- Make right gripper go to grasp pose and grasp --------
+    # Pregrasp pose
+    rospy.sleep(1)
+    pose_command = env.tiago.create_pose_command(right_eef_pos_pre, right_eef_quat_pre)
+    print("Right Hand Going To Pose")
+    env.tiago.tiago_pose_writer['right'].write(pose_command)
+    wait_right(right_eef_pos_pre, env)
+    rospy.sleep(1)
+    right_eef_pose = env._observation()['right_eef']
+    print("RIGHT HAND: Desired and Actual right_eef_pos_pre: ", right_eef_pos_pre, right_eef_pose[:3])
+    print("RIGHT HAND: error in position: ", abs(right_eef_pos_pre - right_eef_pose[:3]))
+
+    # Grasp pose
     rospy.sleep(1)
     pose_command = env.tiago.create_pose_command(right_eef_pos, right_eef_quat)
     print("Right Hand Going To Pose")
@@ -546,24 +417,37 @@ for traj_number in range(1):
 
     # Right hand grasp
     rospy.sleep(1)
-    env.tiago.gripper['right'].write(0.7)
+    # env.tiago.gripper['right'].write(0.7)
+    env.tiago.gripper['right'].write(1.0)
+
+    rospy.sleep(2)
+    right_is_grasp = env.tiago.gripper['right'].is_grasped()
+    print("right_is_grasp: ", right_is_grasp)
+
+    # while not right_is_grasp:
+    #     rospy.sleep(1)
+    #     env.tiago.gripper['right'].write(0)
+    #     rospy.sleep(1)
+    #     env.tiago.gripper['right'].write(1.0)
+    #     right_is_grasp = env.tiago.gripper['right'].is_grasped()
+    #     print("right_is_grasp: ", right_is_grasp)
     # -----------------------------------------------------------------
 
-    # rospy.sleep(1)
-    # right_eef_pose = env._observation()['right_eef']
-    # tooltip_ee_offset = np.array([0.26, 0, 0])
-    # print("quat: ", right_eef_pose[3:])
-    # right_eef_pose_mat = R.from_quat(right_eef_pose[3:]).as_matrix()
-    # tooltip_ee_offset_world = np.dot(right_eef_pose_mat, tooltip_ee_offset)
-    # temp_pos = right_eef_pos + tooltip_ee_offset_world[:3]
-    # print("temp_pos: ", temp_pos)
-    # publish_sphere_marker(marker_pub, temp_pos)
+#     rospy.sleep(1)
+#     right_eef_pose = env._observation()['right_eef']
+#     tooltip_ee_offset = np.array([0.26, 0, 0])
+#     print("quat: ", right_eef_pose[3:])
+#     right_eef_pose_mat = R.from_quat(right_eef_pose[3:]).as_matrix()
+#     tooltip_ee_offset_world = np.dot(right_eef_pose_mat, tooltip_ee_offset)
+#     temp_pos = right_eef_pos + tooltip_ee_offset_world[:3]
+#     print("temp_pos: ", temp_pos)
+#     publish_sphere_marker(marker_pub, temp_pos)
     
     # ----------------------- Robot exeuting the task trajectory -------------------- 
     if args.record:
         recorder.start_recording()
         print("Start recording")
-    
+
     forces, torques = [], []
     forces_sum, torques_sum  = [], []
     interrupted = False
@@ -605,23 +489,24 @@ for traj_number in range(1):
 
         left_is_grasp = env.tiago.gripper['left'].is_grasped()
         right_is_grasp = env.tiago.gripper['right'].is_grasped()
+        print("right_is_grasp: ", right_is_grasp)
         
-        if not left_is_grasp:
-            interrupted = True
-            print("LEFT GRASP LOST. STOPPING!")
-            trajectory_dict['left_grasp_lost'] = i
-            break
+        # if not left_is_grasp:
+        #     interrupted = True
+        #     print("LEFT GRASP LOST. STOPPING!")
+        #     trajectory_dict['left_grasp_lost'] = i
+        #     break
         
-        if not right_is_grasp:
-            interrupted = True
-            print("RIGHT GRASP LOST. STOPPING!")
-            trajectory_dict['right_grasp_lost'] = i
-            break
-        # input("press enter")
+        # if not right_is_grasp:
+        #     interrupted = True
+        #     print("RIGHT GRASP LOST. STOPPING!")
+        #     trajectory_dict['right_grasp_lost'] = i
+        #     break
 
     # Move the arm up
-    if not interrupted:
-        move_up(env)
+    move_up(env)
+
+    # time.sleep(15)
 
     # open gripper again
     print("------------- ROBOT TRAJ COMPLETED -------------")
@@ -635,18 +520,16 @@ for traj_number in range(1):
         recorder.save_video(save_folder, args)
         print("Saved video")
         recorder.reset_frames()
+
     # ------------------------------------------------------------------------------
     
     trajectory_dict['forces'] = forces
     trajectory_dict['torques'] = torques
     succ = input("Final Task Success. O for Failure and 1 for Success")
     trajectory_dict["task_succ"] = succ
-    # with open(f'{save_folder}{traj_number}.pickle', 'wb') as handle:
-    #     pickle.dump(trajectory_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
     with open(f'{save_folder}{args.f_name}.pickle', 'wb') as handle:
         pickle.dump(trajectory_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 if args.record:
     print("Stop recording")
     recorder.stop_recording()
-# print("interesting_trajectories: ", interesting_trajectories)
