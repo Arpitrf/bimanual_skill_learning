@@ -27,14 +27,15 @@ def depth_processing(data):
 
 if __name__=='__main__':
     rospy.init_node('tiago_test')
-    env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='pal')
+    env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='robotiq')
 
 
     img_topic = "/xtion/rgb/image_raw" #"/camera/color/image_raw"
     depth_topic = "/xtion/depth/image_raw" #/camera/aligned_depth_to_color/image_raw"
+    # depth_topic2 = "/xtion/depth_registered/image_raw" #/camera/aligned_depth_to_color/image_raw"
 
-    # img_topic =  "/camera/color/image_raw"
-    # depth_topic = "/camera/aligned_depth_to_color/image_raw"
+    # img_topic =  "/top_down/color/image_raw"
+    # depth_topic = "/top_down/aligned_depth_to_color/image_raw"
 
 
     img_listener = Listener(
@@ -47,10 +48,15 @@ if __name__=='__main__':
                             input_message_type=Image,
                             post_process_func=depth_processing
                         )
+    # depth_listener2 = Listener(
+    #                         input_topic_name=depth_topic2,
+    #                         input_message_type=Image,
+    #                         post_process_func=depth_processing
+    #                     )
 
     r = rospy.Rate(10)
     counter = 1
-    save_path = 'data/tiago_bottle_7/'
+    save_path = 'data/tiago_tissue_roll_3/'
     os.makedirs(save_path+'color_img', exist_ok=True)
     os.makedirs(save_path+'depth_img', exist_ok=True)
     os.makedirs(save_path+'depth', exist_ok=True)
@@ -69,13 +75,15 @@ if __name__=='__main__':
     with open(f'{save_path}extrinsic.pickle', 'wb') as handle:
         pickle.dump(T_world_cam, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    time.sleep(10)
+    # time.sleep(10)
     print("================STARTING CAPTURE===================")
 
     while not rospy.is_shutdown():
         color_img = img_listener.get_most_recent_msg()
         # print('img', img.shape)
         depth_img = depth_listener.get_most_recent_msg()
+        # depth_img2 = depth_listener2.get_most_recent_msg()
+        # depth_img = np.clip(depth_img, None, 1300)
         # cv2.imshow('img', color_img)
         # cv2.imshow('depth', depth_img)
         # fig, ax = plt.subplots(1,2)
@@ -89,9 +97,20 @@ if __name__=='__main__':
             pickle.dump(depth_img, handle, protocol=pickle.HIGHEST_PROTOCOL)
         # final_frame = cv2.cvtColor(color_img.copy(), cv2.COLOR_BGR2RGB)
         cv2.imwrite(f'{save_path}color_img/{counter:04d}.jpg', color_img) 
-        cv2.imwrite(f'{save_path}depth_img/{counter:04d}.jpg', depth_img)
+        # fig, ax = plt.subplots(1,2)
+        # ax[0].imshow(depth_img)
+        # ax[1].imshow(depth_img)
+        # plt.show( )
+        plt.imshow(depth_img)
+        plt.savefig(f'{save_path}depth_img/{counter:04d}.jpg',)
+        # cv2.imwrite(f'{save_path}depth_img/{counter:04d}.jpg', depth_img)
+        if counter == 4:
+            input("press eter to move forward")
+            time.sleep(5)
+            print("RESUMINGGGG")
 
         counter += 1
+
         # cv2.waitKey(10)
         # r.sleep()
 

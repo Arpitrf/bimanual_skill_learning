@@ -295,7 +295,7 @@ class RobotiqGripper:
     def create_gripper_command(self, dist):
         message = JointTrajectory()
         message.header = Header()
-        message.joint_names = ['gripper_right_finger_joint']
+        message.joint_names = [f'gripper_{self.side}_finger_joint']
         point = JointTrajectoryPoint(positions=[dist], time_from_start = rospy.Duration(1))
         message.points.append(point)
         

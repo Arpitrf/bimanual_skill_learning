@@ -1,0 +1,148 @@
+importing libraries
+Initializing cam0:
+	Camera model:	  pinhole-fov
+	Dataset:          april_tag_2.bag
+	Topic:            /xtion/rgb/image_raw
+[ WARN] [1704652471.500223]: BagImageDatasetReader: truncated 498 / 664 images (frequency)
+	Number of images: 166
+
+(Aprilgrid: Tag detection:637): dbind-WARNING **: 18:34:31.519: Couldn't connect to accessibility bus: Failed to connect to socket /tmp/dbus-PETNmM2rCs: Connection refused
+Extracting calibration target corners
+  Progress 32 / 166 	 Time remaining: 6s                  [DEBUG] [1704652473.041794]: Tag with ID 5 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 33 / 166 	 Time remaining: 6s                  [DEBUG] [1704652473.086671]: Tag with ID 3 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 34 / 166 	 Time remaining: 5s                  [DEBUG] [1704652473.127933]: Tag with ID 1 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 35 / 166 	 Time remaining: 5s                  [DEBUG] [1704652473.170282]: Tag with ID 0 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 40 / 166 	 Time remaining: 5s                  [DEBUG] [1704652473.388965]: Tag with ID 2 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652473.388998]: Tag with ID 5 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652473.389003]: Tag with ID 0 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652473.389007]: Tag with ID 1 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652473.389010]: Tag with ID 4 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652473.389014]: Tag with ID 3 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 69 / 166 	 Time remaining: 4s                  [DEBUG] [1704652474.678710]: Tag with ID 35 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 70 / 166 	 Time remaining: 4s                  [DEBUG] [1704652474.725056]: Tag with ID 33 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 71 / 166 	 Time remaining: 4s                  [DEBUG] [1704652474.771890]: Tag with ID 32 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 72 / 166 	 Time remaining: 4s                  [DEBUG] [1704652474.820790]: Tag with ID 30 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 74 / 166 	 Time remaining: 4s                  [DEBUG] [1704652474.912756]: Tag with ID 29 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 75 / 166 	 Time remaining: 4s                  [DEBUG] [1704652474.959574]: Tag with ID 28 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 76 / 166 	 Time remaining: 4s                  [DEBUG] [1704652475.005996]: Tag with ID 27 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 77 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.050089]: Tag with ID 26 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 78 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.098602]: Tag with ID 24 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 79 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.142926]: Tag with ID 24 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 83 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.316162]: Tag with ID 22 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 84 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.358840]: Tag with ID 21 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652475.358868]: Tag with ID 20 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 85 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.401013]: Tag with ID 21 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 86 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.449029]: Tag with ID 23 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 88 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.543639]: Tag with ID 29 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652475.543668]: Tag with ID 28 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 90 / 166 	 Time remaining: 3s                  [DEBUG] [1704652475.640107]: Tag with ID 34 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652475.640137]: Tag with ID 33 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652475.640144]: Tag with ID 32 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 127 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.212584]: Tag with ID 31 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652477.212613]: Tag with ID 30 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 128 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.260932]: Tag with ID 32 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 129 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.311339]: Tag with ID 32 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 130 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.356696]: Tag with ID 32 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 131 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.406153]: Tag with ID 32 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 132 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.455147]: Tag with ID 33 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 133 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.505136]: Tag with ID 34 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652477.505177]: Tag with ID 35 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 137 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.690170]: Tag with ID 24 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 138 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.738208]: Tag with ID 25 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 139 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.782478]: Tag with ID 26 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 140 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.826188]: Tag with ID 27 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 141 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.868979]: Tag with ID 27 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 142 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.912648]: Tag with ID 26 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 143 / 166 	 Time remaining: 1s                  [DEBUG] [1704652477.956097]: Tag with ID 24 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+[DEBUG] [1704652477.956136]: Tag with ID 25 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 145 / 166 	 Time remaining: 0s                  [DEBUG] [1704652478.045679]: Tag with ID 35 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 146 / 166 	 Time remaining: 0s                  [DEBUG] [1704652478.093718]: Tag with ID 33 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 147 / 166 	 Time remaining: 0s                  [DEBUG] [1704652478.139045]: Tag with ID 33 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 148 / 166 	 Time remaining: 0s                  [DEBUG] [1704652478.187848]: Tag with ID 33 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Progress 149 / 166 	 Time remaining: 0s                  [DEBUG] [1704652478.241674]: Tag with ID 31 is only partially in image (corners outside) and will be removed from the TargetObservation.
+
+  Extracted corners for 166 images (of 166 images)                              
+[DEBUG] [1704652479.031904]: calibrateIntrinsics: intrinsics guess: [688.8256555 688.8256555 319.5       239.5      ]
+[DEBUG] [1704652479.034440]: calibrateIntrinsics: distortion guess: [1.]
+[DEBUG] [1704652479.037340]: calibrateIntrinsics: adding camera error terms for 166 calibration targets
+[DEBUG] [1704652479.220716]: calibrateIntrinsics: added 22400 camera error terms
+No linear system solver set in the options. Defaulting to the sparse_cholesky solver
+Using the sparse_cholesky linear system solver
+Using the levenberg_marquardt trust region policy
+[DEBUG] [1704652479.223426]: Before optimization:
+[DEBUG] [1704652479.250237]:  Reprojection error squarred (camL):  mean 6.504458330544085, median 2.980413443167111, std: 13.531623410483169
+No linear system solver set in the options. Defaulting to the sparse_cholesky solver
+Using the sparse_cholesky linear system solver
+Using the levenberg_marquardt trust region policy
+Initializing
+Optimization problem initialized with 334 design variables and 22400 error terms
+The Jacobian matrix is 44800 x 1001
+[0.0]: J: 145700
+Last step was a regression. Reverting
+[1]: J: 237040, dJ: -91340.6, deltaX: 5.23382, LM - lambda:10 mu:2
+Last step was a regression. Reverting
+[2]: J: 207980, dJ: -62279.7, deltaX: 0.488624, LM - lambda:40 mu:4
+[3]: J: 111192, dJ: 34508.3, deltaX: 0.219927, LM - lambda:320 mu:8
+[ERROR] [1704652479.416081]: calibrateIntrinsics: Optimization failed!
+[DEBUG] [1704652479.418652]: calibrateIntrinsics: guess for intrinsics cam: [688.81847591 688.83328011 319.5011375  239.49955554]
+[DEBUG] [1704652479.421040]: calibrateIntrinsics: guess for distortion cam: [0.45710691]
+[ERROR] [1704652479.444663]: initialization of intrinsics for cam with topic /xtion/rgb/image_raw failed  
+Traceback (most recent call last):
+  File "/catkin_ws/devel/lib/kalibr/kalibr_calibrate_cameras", line 15, in <module>
+    exec(compile(fh.read(), python_script, 'exec'), context)
+  File "/catkin_ws/src/kalibr/aslam_offline_calibration/kalibr/python/kalibr_calibrate_cameras", line 465, in <module>
+    main()
+  File "/catkin_ws/src/kalibr/aslam_offline_calibration/kalibr/python/kalibr_calibrate_cameras", line 189, in main
+    raise RuntimeError("Could not initialize the intrinsics for camera with topic: {0}. Try to use --verbose and check whether the calibration target extraction is successful.".format(topic))
+RuntimeError: Could not initialize the intrinsics for camera with topic: /xtion/rgb/image_raw. Try to use --verbose and check whether the calibration target extraction is successful.

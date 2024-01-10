@@ -63,22 +63,28 @@ class Camera:
 class RecordVideo:
 
     def __init__(self,
-                 camera_interface_top,
-                 camera_interface_side,
-                 camera_interface_ego) -> None:
+                 camera_interface_top=None,
+                 camera_interface_side=None,
+                 camera_interface_ego=None) -> None:
         self.recording = False
         self.env_video_frames = {}
-        self.env_video_frames['top'] = []
-        self.env_video_frames['side'] = []
-        self.env_video_frames['ego'] = []
         self.camera_interface_top = camera_interface_top
         self.camera_interface_side = camera_interface_side
         self.camera_interface_ego = camera_interface_ego
+        if self.camera_interface_top:
+            self.env_video_frames['top'] = []
+        if self.camera_interface_side:
+            self.env_video_frames['side'] = []
+        if self.camera_interface_ego:
+            self.env_video_frames['ego'] = []
 
     def reset_frames(self):
-        self.env_video_frames['top'] = []
-        self.env_video_frames['side'] = []
-        self.env_video_frames['ego'] = []
+        if self.camera_interface_top:
+            self.env_video_frames['top'] = []
+        if self.camera_interface_side:
+            self.env_video_frames['side'] = []
+        if self.camera_interface_ego:
+            self.env_video_frames['ego'] = []
     
     def setup_thread(self, target):
         print('SETUP THREAD', target)
@@ -96,15 +102,18 @@ class RecordVideo:
             while self.recording:
                 # if counter % 1000 == 0:
                 time.sleep(0.1)
-                top_view = self.camera_interface_top.get_camera_obs()
-                side_view = self.camera_interface_side.get_camera_obs()
-                ego_view = self.camera_interface_ego.get_camera_obs()
-                capture_top = top_view["color"]
-                capture_side = side_view["color"]
-                capture_ego = ego_view["color"]
-                self.env_video_frames['top'].append(cv2.cvtColor(capture_top.copy(), cv2.COLOR_BGR2RGB))
-                self.env_video_frames['side'].append(cv2.cvtColor(capture_side.copy(), cv2.COLOR_BGR2RGB))
-                self.env_video_frames['ego'].append(cv2.cvtColor(capture_ego.copy(), cv2.COLOR_BGR2RGB))
+                if self.camera_interface_top:
+                    top_view = self.camera_interface_top.get_camera_obs()
+                    capture_top = top_view["color"]
+                    self.env_video_frames['top'].append(cv2.cvtColor(capture_top.copy(), cv2.COLOR_BGR2RGB))
+                if self.camera_interface_side:
+                    side_view = self.camera_interface_side.get_camera_obs()
+                    capture_side = side_view["color"]
+                    self.env_video_frames['side'].append(cv2.cvtColor(capture_side.copy(), cv2.COLOR_BGR2RGB))
+                if self.camera_interface_ego:
+                    ego_view = self.camera_interface_ego.get_camera_obs()
+                    capture_ego = ego_view["color"]
+                    self.env_video_frames['ego'].append(cv2.cvtColor(capture_ego.copy(), cv2.COLOR_BGR2RGB))
                 # cv2.imshow("", cv2.cvtColor(capture.copy(), cv2.COLOR_BGR2RGB))
                 # cv2.waitKey(10)
                 # if counter % 100000 == 0:
@@ -113,7 +122,6 @@ class RecordVideo:
                 # print("counter: ", counter)
 
     def setup_recording(self):
-        print("--------------self.recording: ", self.recording)
         if self.recording:
             return
         self.recorder_on = True
@@ -134,7 +142,7 @@ class RecordVideo:
         self.recording_daemon.join()
         self.recording_daemon = None
 
-    def save_video(self, save_folder, args):
+    def save_video(self, save_folder, args, epoch=None, traj_number=None):
         # print("self.env_video_frames.items(): ", self.env_video_frames.items())
         for key, frames in self.env_video_frames.items():
             if len(frames) == 0:
@@ -142,6 +150,8 @@ class RecordVideo:
             print("len of frames: ", len(frames))
 
             path = f'{save_folder}/{args.f_name}_{key}.mp4'
+            if epoch is not None:
+                path = f'{save_folder}/{epoch}_{traj_number}_{key}.mp4'
             with imageio.get_writer(path, mode='I', fps=10) as writer: # originally 24
                 for frame in frames:
                     writer.append_data(frame)

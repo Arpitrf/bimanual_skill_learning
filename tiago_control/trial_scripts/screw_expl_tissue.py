@@ -231,7 +231,7 @@ seed = 0
 args = config_parser().parse_args()
 np.random.seed(seed)
 rospy.init_node('tiago_test')
-env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='pal')
+env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='robotiq')
 ft = ForceTorqueSensor()
 
 side_cam = Camera(img_topic="/side_1/color/image_raw", depth_topic="/side_1/aligned_depth_to_color/image_raw")

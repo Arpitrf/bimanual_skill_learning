@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import cv2
 
 rospy.init_node('tiago_test')
-env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='pal')
+env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='robotiq')
 
 # -------------- ---- Print the current pose --------------------
 right_eef_pose, left_eef_pose = None, None
@@ -620,13 +620,15 @@ def home_right_hand(env):
 # print("f, torque, sum(force), sum(torque): ", [f.x, f.y, f.z], [t.x, t.y, t.z], abs(f.x) + abs(f.y) + abs(f.z), abs(t.x) + abs(t.y) + abs(t.z))
 
 # # ------------------------------ Random testing -------------------------
-# with open('/home/pal/arpit/bimanual_skill_learning/output/tissue/seed_0/trial_2.pickle', 'rb') as handle:
+# with open('/home/pal/arpit/bimanual_skill_learning/output/bottle2/seed_5/1_0.pickle', 'rb') as handle:
 #     traj = pickle.load(handle)
 # print(traj.keys())
 # forces_sum = []
 # torques_sum = []
 # forces = traj['forces']
 # torques = traj['torques']
+# forces = np.array(traj['forces'])
+# torques = np.array(traj['torques'])
 # print("len(forces), len(torques): ", len(forces), len(torques))
 # print("left_grasp_lost, right_grasp_lost: ", traj['left_grasp_lost'], traj['right_grasp_lost'])
 
@@ -640,8 +642,8 @@ def home_right_hand(env):
 
 # for i in range(len(forces)):
 #     # print(forces[i])
-#     forces_sum.append(abs(forces[i].x) + abs(forces[i].y) + abs(forces[i].z))
-#     torques_sum.append(abs(torques[i].x) + abs(torques[i].y) + abs(torques[i].z))
+#     forces_sum.append(abs(forces[i,0]) + abs(forces[i,1]) + abs(forces[i,2]))
+#     torques_sum.append(abs(torques[i,0]) + abs(torques[i,1]) + abs(torques[i,2]))
 # fig, ax = plt.subplots(1,2)
 # ax[0].set_ylim([0, 70])
 # ax[1].set_ylim([0, 15])

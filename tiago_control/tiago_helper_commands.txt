@@ -290,3 +290,76 @@ goal: {}"
 source /opt/ros/noetic/setup.bash
 roslaunch realsense2_camera rs_camera.launch usb_port_id:=2-1 camera:=top_down
 roslaunch realsense2_camera rs_camera.launch usb_port_id:=2-2 camera:=side_1
+
+
+# Default controllers for head
+rostopic pub /head_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names: ['head_1_joint', 'head_2_joint']
+points:
+  - positions: [-0.7, -0.8]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 1
+        nsecs: 0"  --rate 5
+
+# torso
+rostopic pub /torso_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names: ['torso_lift_joint']
+points:
+  - positions: [0.35]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 1
+        nsecs: 0" 
+
+# bottle:
+rostopic pub /head_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names: ['head_1_joint', 'head_2_joint']
+points:
+  - positions: [-0.4, -0.9]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 1
+        nsecs: 0" --rate 5
+
+
+rostopic pub /gripper_left_controller/command trajectory_msgs/JointTrajectory "
+header:
+    seq: 0
+    stamp:
+        secs: 0
+        nsecs: 0
+    frame_id: ''
+joint_names: ['gripper_left_finger_joint']
+points:
+  - positions: [1.0]
+    velocities: []
+    accelerations: []
+    effort: []
+    time_from_start:
+        secs: 1
+        nsecs: 0" --once

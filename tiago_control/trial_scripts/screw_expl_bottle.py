@@ -309,12 +309,14 @@ seed = 0
 args = config_parser().parse_args()
 np.random.seed(seed)
 rospy.init_node('tiago_test')
-env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='pal')
+env = TiagoGym(frequency=10, right_arm_enabled=True, left_arm_enabled=True, right_gripper_type='robotiq', left_gripper_type='robotiq')
 ft = ForceTorqueSensor()
 
-side_cam = Camera(img_topic="/side_1/color/image_raw", depth_topic="/side_1/aligned_depth_to_color/image_raw")
-top_down_cam = Camera(img_topic="/top_down/color/image_raw", depth_topic="/top_down/aligned_depth_to_color/image_raw")
-ego_cam = Camera(img_topic="/xtion/rgb/image_raw", depth_topic="/xtion/depth/image_raw")
+side_cam, top_down_cam, ego_cam = None, None, None
+if args.record:
+    side_cam = Camera(img_topic="/side_1/color/image_raw", depth_topic="/side_1/aligned_depth_to_color/image_raw")
+    top_down_cam = Camera(img_topic="/top_down/color/image_raw", depth_topic="/top_down/aligned_depth_to_color/image_raw")
+    ego_cam = Camera(img_topic="/xtion/rgb/image_raw", depth_topic="/xtion/depth/image_raw")
 
 
 # Obtain axis from perception
@@ -342,7 +344,7 @@ print("s_hat, q: ", s_hat_perception, q_perception)
 # bottle_right_pose
 left_eef_pos_pre = np.array([ 0.54033371,  0.20095334,  0.79674643])
 left_eef_quat_pre = np.array([ 0.43567574, -0.54655992,  0.44715073, -0.5581354])
-left_eef_pos = np.array([ 0.54033371,  0.02095334,  0.79674643])
+left_eef_pos = np.array([ 0.54033371,  0.00095334,  0.79674643])
 left_eef_quat= np.array([ 0.43567574, -0.54655992,  0.44715073, -0.5581354])
 
 # # bottle middle pose
@@ -432,7 +434,7 @@ for traj_number in range(1):
     # s_hat, q = np.array([-0.08816754, -0.02153198,  0.99587291]), np.array([ 0.59708694, -0.16966684,  0.13509701])
     
     # trial 2 (0, 4) - Good 0.311, 0.069
-    # s_hat, q = np.array([-0.07296414, -0.02632962,  0.99698695]), np.array([ 0.58814249, -0.14366633,  0.20695057])
+    s_hat, q = np.array([-0.07296414, -0.02632962,  0.99698695]), np.array([ 0.58814249, -0.14366633,  0.20695057])
     # trial 1 (0, 17) - Goodish 1.412, 0.196 
     # s_hat, q = np.array([-0.0912213,  -0.09355492,  0.99142632]), np.array([ 0.57444014, -0.06673279,  0.11108433])
     # trial 3 (0, 6) - Goodish 1.352, 0.110 
@@ -440,7 +442,7 @@ for traj_number in range(1):
     # trial 4 (0, 5) - Goodish 1.698, 0.186
     # s_hat, q = np.array([-0.1263994,  -0.01573022,  0.9918547 ]), np.array([ 0.5919598,  -0.2103789,   0.18964259]) 
     # trial 5 Bad 2.380 0.412
-    s_hat, q = np.array([-0.07385186, -0.17440865,  0.98189996]), np.array([ 0.68489215, -0.05320495,  0.14008214]) 
+    # s_hat, q = np.array([-0.07385186, -0.17440865,  0.98189996]), np.array([ 0.68489215, -0.05320495,  0.14008214]) 
     # trial 6 Bad  4.180 0.169
     # s_hat, q = np.array([-0.10365334, -0.06341209,  0.99258999]), np.array([ 0.74633728, -0.20999397,  0.14893376]) 
     # trial 7 Bad 6.191 0.864 
@@ -496,13 +498,13 @@ for traj_number in range(1):
 
     # -------------------------------------------------------------------------------------------
 
-    # Open gripper and go home
+    # # Open gripper and go home
     rospy.sleep(1)
-    env.tiago.gripper['left'].write(1)
+    env.tiago.gripper['left'].write(0)
     env.tiago.gripper['right'].write(0)
     rospy.sleep(1)
     # go to home
-    home_left_hand(env)
+    # home_left_hand(env)
     home_right_hand(env)
 
     # -------- Make left gripper go to pose and grasp ---------------
@@ -530,7 +532,7 @@ for traj_number in range(1):
 
     # Close gripper
     rospy.sleep(1)
-    env.tiago.gripper['left'].write(0)
+    env.tiago.gripper['left'].write(1)
     #-----------------------------------------------------------------
 
     # --------- Make right gripper go to grasp pose and grasp --------
@@ -626,7 +628,7 @@ for traj_number in range(1):
     # open gripper again
     print("------------- ROBOT TRAJ COMPLETED -------------")
     rospy.sleep(1)
-    env.tiago.gripper['left'].write(1)
+    env.tiago.gripper['left'].write(0)
     env.tiago.gripper['right'].write(0)
     rospy.sleep(1)
 

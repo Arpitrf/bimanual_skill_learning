@@ -3,16 +3,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-folder = "/home/pal/arpit/bimanual_skill_learning/output/tissue_insert_far/seed_0/"
+folder = "/home/pal/arpit/bimanual_skill_learning/output/bottle2/seed_5/"
 # folder = "/home/pal/arpit/bimanual_skill_learning/output/bottle/seed_0/"
 fig, ax = plt.subplots(1,2)
 ax[0].set_ylim([0, 70])
 ax[1].set_ylim([0, 15])
 
+file_names = ['1_0.pickle', '1_4.pickle', '1_6.pickle']
 
 for file in os.listdir(folder):
     filename = os.fsdecode(file)
     if filename.endswith(".pickle"):
+        if filename not in file_names:
+            continue
         print(f"---------------------- {filename} --------------------")
         with open(f'{folder}{filename}', 'rb') as handle:
             traj = pickle.load(handle)
